@@ -55,3 +55,38 @@ export function logIn(
   }
   return { ok: true, user: toPublic(row) };
 }
+
+export function setAdminByEmail(
+  db: AppDb,
+  email: string,
+): { ok: true; email: string } | { ok: false; error: string } {
+  const normalized = normalizeEmail(email);
+  if (!normalized) return { ok: false, error: "Enter a valid email." };
+  const row = db.select().from(users).where(eq(users.email, normalized)).get();
+  if (!row) return { ok: false, error: "No account for that email. Sign up first." };
+  db.update(users).set({ role: "admin" }).where(eq(users.id, row.id)).run();
+  return { ok: true, email: normalized };
+}
+
+export function setAuthorGrant(
+  db: AppDb,
+  actorRole: Role,
+  userId: number,
+  grant: boolean,
+): { ok: true } | { ok: false; error: "forbidden" | "missing" | "is_admin" } {
+  if (actorRole !== "admin") return { ok: false, error: "forbidden" };
+  const row = db.select().from(users).where(eq(users.id, userId)).get();
+  if (!row) return { ok: false, error: "missing" };
+  if (row.role === "admin") return { ok: false, error: "is_admin" };
+  db.update(users).set({ role: grant ? "author" : "user" }).where(eq(users.id, userId)).run();
+  return { ok: true };
+}
+
+export function listUsers(db: AppDb): PublicUser[] {
+  return db
+    .select()
+    .from(users)
+    .all()
+    .map((row) => toPublic(row))
+    .sort((a, b) => a.email.localeCompare(b.email));
+}
