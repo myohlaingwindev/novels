@@ -1,10 +1,12 @@
+import { forbidden } from "next/navigation";
 import { requireUser } from "@/auth/current";
 import { getDatabase } from "@/db/client";
 import { listUsers } from "@/auth/users";
 import { setAuthorAction } from "./actions";
 
 export default async function UsersPage() {
-  await requireUser();
+  const user = await requireUser();
+  if (user.role !== "admin") forbidden();
   const accounts = listUsers(getDatabase());
   return (
     <main>
