@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import type { FormState } from "@/auth/actions";
 
 export function ChapterForm({
@@ -19,15 +19,29 @@ export function ChapterForm({
   submitLabel: string;
 }) {
   const [state, formAction] = useActionState(action, null as FormState);
+  const [titleValue, setTitleValue] = useState(title);
+  const [bodyValue, setBodyValue] = useState(body);
   return (
     <form action={formAction}>
       <input type="hidden" name="novelId" value={novelId} />
       {chapterId !== undefined ? <input type="hidden" name="chapterId" value={chapterId} /> : null}
       <label>
-        Title <input name="title" defaultValue={title} required />
+        Title{" "}
+        <input
+          name="title"
+          value={titleValue}
+          onChange={(event) => setTitleValue(event.target.value)}
+          required
+        />
       </label>
       <label>
-        Chapter text <textarea name="body" defaultValue={body} required />
+        Chapter text{" "}
+        <textarea
+          name="body"
+          value={bodyValue}
+          onChange={(event) => setBodyValue(event.target.value)}
+          required
+        />
       </label>
       {state?.error ? <p className="error">{state.error}</p> : null}
       <button type="submit">{submitLabel}</button>

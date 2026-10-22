@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import type { FormState } from "@/auth/actions";
 
 export function NovelForm({
@@ -17,14 +17,27 @@ export function NovelForm({
   submitLabel: string;
 }) {
   const [state, formAction] = useActionState(action, null as FormState);
+  const [titleValue, setTitleValue] = useState(title);
+  const [descriptionValue, setDescriptionValue] = useState(description);
   return (
     <form action={formAction}>
       {id !== undefined ? <input type="hidden" name="id" value={id} /> : null}
       <label>
-        Title <input name="title" defaultValue={title} required />
+        Title{" "}
+        <input
+          name="title"
+          value={titleValue}
+          onChange={(event) => setTitleValue(event.target.value)}
+          required
+        />
       </label>
       <label>
-        Description <textarea name="description" defaultValue={description} />
+        Description{" "}
+        <textarea
+          name="description"
+          value={descriptionValue}
+          onChange={(event) => setDescriptionValue(event.target.value)}
+        />
       </label>
       {state?.error ? <p className="error">{state.error}</p> : null}
       <button type="submit">{submitLabel}</button>
