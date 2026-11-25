@@ -1,41 +1,42 @@
-import { and, count, eq } from "drizzle-orm";
 import type { AppDb } from "@/db/client";
-import { chapters, novels, progress } from "@/db/schema";
 import { getChapterByNumber, listChapters } from "@/novels/chapters";
 import { getNovelBySlug } from "@/novels/novels";
+import { chapterHeading } from "@/reading/heading";
 
-export function listNovelsForLibrary(db: AppDb, readerId: number) {
-  return db
-    .select()
-    .from(novels)
-    .all()
-    .map((novel) => {
-      const chapterCount =
-        db.select({ value: count() }).from(chapters).where(eq(chapters.novelId, novel.id)).get()?.value ?? 0;
-      const saved = db
-        .select()
-        .from(progress)
-        .where(and(eq(progress.userId, readerId), eq(progress.novelId, novel.id)))
-        .get();
-      const savedChapter = saved
-        ? db.select().from(chapters).where(eq(chapters.id, saved.chapterId)).get()
-        : undefined;
-      return {
-        id: novel.id,
-        title: novel.title,
-        description: novel.description,
-        slug: novel.slug,
-        chapterCount,
-        continueNumber: savedChapter?.number ?? null,
-      };
-    })
-    .sort((a, b) => b.id - a.id);
+function visibleNovel(novel: { hidden: boolean; titleMy: string }) {
+  return novel.hidden === false && novel.titleMy.trim() !== "";
 }
 
-export function getNovelDetail(db: AppDb, slug: string, readerId: number) {
-  const novel = getNovelBySlug(db, slug);
-  if (!novel) return { ok: false as const };
-  const libraryEntry = listNovelsForLibrary(db, readerId).find((item) => item.id === novel.id);
+function visibleChapter(chapter: { hidden: boolean; bodyMy: string }) {
+  return chapter.hidden === false && chapter.bodyMy.trim() !== "";
+}
+
+export async function listNovelsForLibrary(db: AppDb, readerId: number) {
+  const novels = (await db.novel.findMany({ orderBy: { id: "desc" } })).filter(visibleNovel);
+  return Promise.all(
+    novels.map(async (novel) => {
+      const chapters = (await listChapters(db, Number(novel.id))).filter(visibleChapter);
+      const saved = await db.progress.findUnique({
+        where: { userId_novelId: { userId: readerId, novelId: novel.id } },
+      });
+      const savedChapter = saved ? await db.chapter.findUnique({ where: { id: saved.chapterId } }) : null;
+      return {
+        id: Number(novel.id),
+        title: novel.titleMy,
+        description: novel.descriptionMy,
+        genre: novel.genre,
+        slug: novel.slug,
+        chapterCount: chapters.length,
+        continueNumber: savedChapter && visibleChapter(savedChapter) ? savedChapter.number : null,
+      };
+    }),
+  );
+}
+
+export async function getNovelDetail(db: AppDb, slug: string, readerId: number) {
+  const novel = await getNovelBySlug(db, slug);
+  if (!novel || !visibleNovel(novel)) return { ok: false as const };
+  const libraryEntry = (await listNovelsForLibrary(db, readerId)).find((item) => item.id === novel.id);
   return {
     ok: true as const,
     novel: {
@@ -44,38 +45,36 @@ export function getNovelDetail(db: AppDb, slug: string, readerId: number) {
       description: novel.description,
       slug: novel.slug,
     },
-    chapters: listChapters(db, novel.id).map((chapter) => ({
+    chapters: (await listChapters(db, novel.id)).filter(visibleChapter).map((chapter) => ({
       id: chapter.id,
       number: chapter.number,
-      title: chapter.title,
+      title: chapterHeading(chapter.number, chapter.titleMy),
     })),
     continueNumber: libraryEntry?.continueNumber ?? null,
   };
 }
 
-export function openChapter(db: AppDb, userId: number, slug: string, number: number) {
-  const novel = getNovelBySlug(db, slug);
-  if (!novel) return { ok: false as const, error: "not_found" as const };
-  const chapter = getChapterByNumber(db, novel.id, number);
-  if (!chapter) return { ok: false as const, error: "not_found" as const };
+export async function openChapter(db: AppDb, userId: number, slug: string, number: number) {
+  const novel = await getNovelBySlug(db, slug);
+  if (!novel || !visibleNovel(novel)) return { ok: false as const, error: "not_found" as const };
+  const chapter = await getChapterByNumber(db, novel.id, number);
+  if (!chapter || !visibleChapter(chapter)) return { ok: false as const, error: "not_found" as const };
   const now = Date.now();
-  db.insert(progress)
-    .values({ userId, novelId: novel.id, chapterId: chapter.id, updatedAt: now })
-    .onConflictDoUpdate({
-      target: [progress.userId, progress.novelId],
-      set: { chapterId: chapter.id, updatedAt: now },
-    })
-    .run();
-  const numbers = listChapters(db, novel.id).map((item) => item.number);
+  await db.progress.upsert({
+    where: { userId_novelId: { userId, novelId: novel.id } },
+    create: { userId, novelId: novel.id, chapterId: chapter.id, updatedAt: now },
+    update: { chapterId: chapter.id, updatedAt: now },
+  });
+  const numbers = (await listChapters(db, novel.id)).filter(visibleChapter).map((item) => item.number);
   const index = numbers.indexOf(chapter.number);
   return {
     ok: true as const,
-    novel: { title: novel.title, slug: novel.slug },
+    novel: { title: novel.titleMy, slug: novel.slug },
     chapter: {
       id: chapter.id,
       number: chapter.number,
-      title: chapter.title,
-      body: chapter.body,
+      title: chapterHeading(chapter.number, chapter.titleMy),
+      body: chapter.bodyMy,
     },
     prevNumber: index > 0 ? numbers[index - 1] : null,
     nextNumber: index >= 0 && index < numbers.length - 1 ? numbers[index + 1] : null,
