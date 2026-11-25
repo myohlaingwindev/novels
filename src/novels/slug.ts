@@ -1,8 +1,11 @@
-export function slugify(title: string): string {
-  const slug = title
+export function normalizeSlug(value: string): string {
+  return value
     .toLowerCase()
     .trim()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
-  return slug || "novel";
+}
+
+export function slugify(title: string): string {
+  return normalizeSlug(title) || "novel";
 }

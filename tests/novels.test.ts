@@ -1,84 +1,109 @@
 import { describe, expect, test } from "vitest";
+import type { AppDb } from "@/db/client";
 import { setAdminByEmail, setAuthorGrant, signUp } from "@/auth/users";
 import { createNovel, deleteNovel, getNovelById, updateNovel } from "@/novels/novels";
-import type { AppDb } from "@/db/client";
-import { testDb } from "./helpers";
+import { novelInput, testDb } from "./helpers";
 
-function account(db: AppDb, email: string) {
-  const result = signUp(db, { email, password: "password1" });
+async function account(db: AppDb, email: string) {
+  const result = await signUp(db, { email, password: "password1" });
   if (!result.ok) throw new Error(result.error);
   return result.user;
 }
 
+async function grantedAuthor(db: AppDb) {
+  const admin = await account(db, "owner@example.com");
+  await setAdminByEmail(db, admin.email);
+  const author = await account(db, "author@example.com");
+  await setAuthorGrant(db, "admin", author.id, true);
+  return { ...author, role: "author" as const };
+}
+
 describe("novels", () => {
-  test("a user cannot create a novel", () => {
-    const db = testDb();
-    const reader = account(db, "reader@example.com");
-    expect(createNovel(db, reader, { title: "Dawn", description: "" })).toEqual({
+  test("a user cannot create a novel", async () => {
+    const db = await testDb();
+    const reader = await account(db, "reader@example.com");
+    expect(await createNovel(db, reader, novelInput())).toEqual({
       ok: false,
       error: "forbidden",
     });
   });
 
-  test("an author creates a novel and a second identical title gets a slug suffix", () => {
-    const db = testDb();
-    const admin = account(db, "owner@example.com");
-    setAdminByEmail(db, admin.email);
-    const author = account(db, "author@example.com");
-    setAuthorGrant(db, "admin", author.id, true);
-    const granted = { ...author, role: "author" as const };
-    const first = createNovel(db, granted, { title: "Dawn", description: "" });
-    const second = createNovel(db, granted, { title: "Dawn", description: "More" });
-    if (!first.ok || !second.ok) throw new Error("create failed");
-    expect(first.novel.slug).toBe("dawn");
-    expect(second.novel.slug).toBe("dawn-2");
-    expect(second.novel.description).toBe("More");
+  test("stores the author slug and starts hidden", async () => {
+    const db = await testDb();
+    const author = await grantedAuthor(db);
+    const created = await createNovel(db, author, novelInput({ slug: "My Novel", title: "黎明" }));
+    if (!created.ok) throw new Error("create failed");
+    expect(created.novel.slug).toBe("my-novel");
+    expect(created.novel.hidden).toBe(true);
+    expect(created.novel.title).toBe("黎明");
   });
 
-  test("an author cannot edit or delete another account's novel", () => {
-    const db = testDb();
-    const owner = account(db, "owner@example.com");
-    setAdminByEmail(db, owner.email);
-    const other = account(db, "other@example.com");
-    setAuthorGrant(db, "admin", other.id, true);
-    const created = createNovel(db, { ...owner, role: "admin" }, { title: "Dawn", description: "" });
-    if (!created.ok) throw new Error("create failed");
-    const actor = { ...other, role: "author" as const };
-    expect(updateNovel(db, actor, created.novel.id, { title: "Stolen", description: "" })).toEqual({
+  test("rejects an empty slug and a slug that is already used", async () => {
+    const db = await testDb();
+    const author = await grantedAuthor(db);
+    expect(await createNovel(db, author, novelInput({ slug: "---" }))).toEqual({ ok: false, error: "slug" });
+    const first = await createNovel(db, author, novelInput({ slug: "dawn" }));
+    if (!first.ok) throw new Error("create failed");
+    expect(await createNovel(db, author, novelInput({ slug: "Dawn", title: "Other" }))).toEqual({
       ok: false,
-      error: "forbidden",
+      error: "duplicate",
     });
-    expect(deleteNovel(db, actor, created.novel.id)).toEqual({ ok: false, error: "forbidden" });
-    expect(getNovelById(db, created.novel.id)?.title).toBe("Dawn");
   });
 
-  test("renaming a novel keeps the slug", () => {
-    const db = testDb();
-    const owner = account(db, "owner@example.com");
-    setAdminByEmail(db, owner.email);
-    const created = createNovel(db, { ...owner, role: "admin" }, { title: "Dawn", description: "" });
+  test("rejects an unknown genre", async () => {
+    const db = await testDb();
+    const author = await grantedAuthor(db);
+    expect(await createNovel(db, author, novelInput({ genre: "fantasy" }))).toEqual({ ok: false, error: "genre" });
+  });
+
+  test("refuses to show a novel without a Burmese title and does not change the row", async () => {
+    const db = await testDb();
+    const author = await grantedAuthor(db);
+    const created = await createNovel(db, author, novelInput());
     if (!created.ok) throw new Error("create failed");
-    const updated = updateNovel(db, { ...owner, role: "admin" }, created.novel.id, {
-      title: "Evening",
-      description: "Quiet",
-    });
+    expect(
+      await updateNovel(db, author, created.novel.id, novelInput({ title: "Evening", hidden: false })),
+    ).toEqual({ ok: false, error: "burmeseTitle" });
+    expect((await getNovelById(db, created.novel.id))?.title).toBe("Dawn");
+    expect((await getNovelById(db, created.novel.id))?.hidden).toBe(true);
+  });
+
+  test("renaming a novel keeps the slug", async () => {
+    const db = await testDb();
+    const author = await grantedAuthor(db);
+    const created = await createNovel(db, author, novelInput());
+    if (!created.ok) throw new Error("create failed");
+    const updated = await updateNovel(db, author, created.novel.id, novelInput({ title: "Evening", description: "Quiet" }));
     if (!updated.ok) throw new Error("update failed");
     expect(updated.novel.slug).toBe("dawn");
     expect(updated.novel.title).toBe("Evening");
   });
 
-  test("a revoked author cannot edit the novel they still own", () => {
-    const db = testDb();
-    const owner = account(db, "owner@example.com");
-    const writer = account(db, "writer@example.com");
-    setAdminByEmail(db, owner.email);
-    setAuthorGrant(db, "admin", writer.id, true);
-    const created = createNovel(db, { ...writer, role: "author" }, { title: "Dawn", description: "" });
+  test("an author cannot edit or delete another account's novel", async () => {
+    const db = await testDb();
+    const author = await grantedAuthor(db);
+    const admin = await db.user.findUnique({ where: { email: "owner@example.com" } });
+    if (!admin) throw new Error("admin missing");
+    const created = await createNovel(db, { id: Number(admin.id), role: "admin" }, novelInput());
     if (!created.ok) throw new Error("create failed");
-    setAuthorGrant(db, "admin", writer.id, false);
-    expect(
-      updateNovel(db, { ...writer, role: "user" }, created.novel.id, { title: "Dawn", description: "x" }),
-    ).toEqual({ ok: false, error: "forbidden" });
-    expect(getNovelById(db, created.novel.id)?.description).toBe("");
+    expect(await updateNovel(db, author, created.novel.id, novelInput({ title: "Stolen" }))).toEqual({
+      ok: false,
+      error: "forbidden",
+    });
+    expect(await deleteNovel(db, author, created.novel.id)).toEqual({ ok: false, error: "forbidden" });
+    expect((await getNovelById(db, created.novel.id))?.title).toBe("Dawn");
+  });
+
+  test("a revoked author cannot edit the novel they still own", async () => {
+    const db = await testDb();
+    const author = await grantedAuthor(db);
+    const created = await createNovel(db, author, novelInput());
+    if (!created.ok) throw new Error("create failed");
+    await setAuthorGrant(db, "admin", author.id, false);
+    expect(await updateNovel(db, { ...author, role: "user" }, created.novel.id, novelInput({ description: "x" }))).toEqual({
+      ok: false,
+      error: "forbidden",
+    });
+    expect((await getNovelById(db, created.novel.id))?.description).toBe("");
   });
 });

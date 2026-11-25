@@ -17,3 +17,16 @@ export async function testDb() {
   await client.user.deleteMany();
   return client;
 }
+
+export function novelInput(overrides: Record<string, string | boolean> = {}) {
+  return {
+    title: "Dawn",
+    description: "",
+    slug: "dawn",
+    genre: "xianxia",
+    titleMy: "",
+    descriptionMy: "",
+    hidden: true,
+    ...overrides,
+  };
+}

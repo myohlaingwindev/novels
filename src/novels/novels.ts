@@ -1,15 +1,28 @@
-import { eq } from "drizzle-orm";
 import type { AppDb } from "@/db/client";
-import { novels } from "@/db/schema";
 import type { Role } from "@/auth/access";
 import { canWrite } from "@/auth/access";
-import { slugify } from "@/novels/slug";
+import { isGenre, type Genre } from "@/novels/genre";
+import { normalizeSlug } from "@/novels/slug";
+
+export type NovelInput = {
+  title: string;
+  description: string;
+  slug: string;
+  genre: string;
+  titleMy: string;
+  descriptionMy: string;
+  hidden: boolean;
+};
 
 export type Novel = {
   id: number;
   ownerId: number;
   title: string;
   description: string;
+  titleMy: string;
+  descriptionMy: string;
+  genre: Genre;
+  hidden: boolean;
   slug: string;
   createdAt: number;
   updatedAt: number;
@@ -17,103 +30,123 @@ export type Novel = {
 
 type Actor = { id: number; role: Role };
 
-function toNovel(row: typeof novels.$inferSelect): Novel {
+function toNovel(row: {
+  id: bigint;
+  ownerId: bigint;
+  title: string;
+  description: string;
+  titleMy: string;
+  descriptionMy: string;
+  genre: string;
+  hidden: boolean;
+  slug: string;
+  createdAt: bigint;
+  updatedAt: bigint;
+}): Novel {
+  if (!isGenre(row.genre)) throw new Error("invalid genre");
   return {
-    id: row.id,
-    ownerId: row.ownerId,
+    id: Number(row.id),
+    ownerId: Number(row.ownerId),
     title: row.title,
     description: row.description,
+    titleMy: row.titleMy,
+    descriptionMy: row.descriptionMy,
+    genre: row.genre,
+    hidden: row.hidden,
     slug: row.slug,
-    createdAt: row.createdAt,
-    updatedAt: row.updatedAt,
+    createdAt: Number(row.createdAt),
+    updatedAt: Number(row.updatedAt),
   };
 }
 
-function uniqueSlug(db: AppDb, title: string): string {
-  const base = slugify(title);
-  let slug = base;
-  let suffix = 2;
-  while (db.select().from(novels).where(eq(novels.slug, slug)).get()) {
-    slug = `${base}-${suffix}`;
-    suffix += 1;
-  }
-  return slug;
-}
-
-export function getNovelById(db: AppDb, novelId: number): Novel | null {
-  const row = db.select().from(novels).where(eq(novels.id, novelId)).get();
+export async function getNovelById(db: AppDb, novelId: number): Promise<Novel | null> {
+  const row = await db.novel.findUnique({ where: { id: novelId } });
   return row ? toNovel(row) : null;
 }
 
-export function getNovelBySlug(db: AppDb, slug: string): Novel | null {
-  const row = db.select().from(novels).where(eq(novels.slug, slug)).get();
+export async function getNovelBySlug(db: AppDb, slug: string): Promise<Novel | null> {
+  const row = await db.novel.findUnique({ where: { slug } });
   return row ? toNovel(row) : null;
 }
 
-export function listOwnedNovels(db: AppDb, ownerId: number): Novel[] {
-  return db
-    .select()
-    .from(novels)
-    .where(eq(novels.ownerId, ownerId))
-    .all()
-    .map((row) => toNovel(row))
-    .sort((a, b) => b.createdAt - a.createdAt);
+export async function listOwnedNovels(db: AppDb, ownerId: number): Promise<Novel[]> {
+  const rows = await db.novel.findMany({ where: { ownerId }, orderBy: { createdAt: "desc" } });
+  return rows.map((row) => toNovel(row));
 }
 
-export function createNovel(
+export async function createNovel(
   db: AppDb,
   actor: Actor,
-  input: { title: string; description: string },
-): { ok: true; novel: Novel } | { ok: false; error: "forbidden" | "title" } {
+  input: NovelInput,
+): Promise<{ ok: true; novel: Novel } | { ok: false; error: "forbidden" | "title" | "slug" | "duplicate" | "genre" | "burmeseTitle" }> {
   if (!canWrite(actor.role)) return { ok: false, error: "forbidden" };
   const title = input.title.trim();
   if (!title) return { ok: false, error: "title" };
+  if (!isGenre(input.genre)) return { ok: false, error: "genre" };
+  const titleMy = input.titleMy.trim();
+  if (!input.hidden && !titleMy) return { ok: false, error: "burmeseTitle" };
+  const slug = normalizeSlug(input.slug);
+  if (!slug) return { ok: false, error: "slug" };
+  if (await db.novel.findUnique({ where: { slug } })) return { ok: false, error: "duplicate" };
   const now = Date.now();
-  const row = db
-    .insert(novels)
-    .values({
+  const row = await db.novel.create({
+    data: {
       ownerId: actor.id,
       title,
       description: input.description.trim(),
-      slug: uniqueSlug(db, title),
+      titleMy,
+      descriptionMy: input.descriptionMy.trim(),
+      genre: input.genre,
+      hidden: input.hidden,
+      slug,
       createdAt: now,
       updatedAt: now,
-    })
-    .returning()
-    .all()[0];
+    },
+  });
   return { ok: true, novel: toNovel(row) };
 }
 
-export function updateNovel(
+export async function updateNovel(
   db: AppDb,
   actor: Actor,
   novelId: number,
-  input: { title: string; description: string },
-): { ok: true; novel: Novel } | { ok: false; error: "forbidden" | "missing" | "title" } {
+  input: Omit<NovelInput, "slug">,
+): Promise<
+  { ok: true; novel: Novel } | { ok: false; error: "forbidden" | "missing" | "title" | "genre" | "burmeseTitle" }
+> {
   if (!canWrite(actor.role)) return { ok: false, error: "forbidden" };
-  const current = db.select().from(novels).where(eq(novels.id, novelId)).get();
+  const current = await db.novel.findUnique({ where: { id: novelId } });
   if (!current) return { ok: false, error: "missing" };
-  if (current.ownerId !== actor.id) return { ok: false, error: "forbidden" };
+  if (Number(current.ownerId) !== actor.id) return { ok: false, error: "forbidden" };
   const title = input.title.trim();
   if (!title) return { ok: false, error: "title" };
-  const row = db
-    .update(novels)
-    .set({ title, description: input.description.trim(), updatedAt: Date.now() })
-    .where(eq(novels.id, novelId))
-    .returning()
-    .all()[0];
+  if (!isGenre(input.genre)) return { ok: false, error: "genre" };
+  const titleMy = input.titleMy.trim();
+  if (!input.hidden && !titleMy) return { ok: false, error: "burmeseTitle" };
+  const row = await db.novel.update({
+    where: { id: novelId },
+    data: {
+      title,
+      description: input.description.trim(),
+      titleMy,
+      descriptionMy: input.descriptionMy.trim(),
+      genre: input.genre,
+      hidden: input.hidden,
+      updatedAt: Date.now(),
+    },
+  });
   return { ok: true, novel: toNovel(row) };
 }
 
-export function deleteNovel(
+export async function deleteNovel(
   db: AppDb,
   actor: Actor,
   novelId: number,
-): { ok: true } | { ok: false; error: "forbidden" | "missing" } {
+): Promise<{ ok: true } | { ok: false; error: "forbidden" | "missing" }> {
   if (!canWrite(actor.role)) return { ok: false, error: "forbidden" };
-  const current = db.select().from(novels).where(eq(novels.id, novelId)).get();
+  const current = await db.novel.findUnique({ where: { id: novelId } });
   if (!current) return { ok: false, error: "missing" };
-  if (current.ownerId !== actor.id) return { ok: false, error: "forbidden" };
-  db.delete(novels).where(eq(novels.id, novelId)).run();
+  if (Number(current.ownerId) !== actor.id) return { ok: false, error: "forbidden" };
+  await db.novel.delete({ where: { id: novelId } });
   return { ok: true };
 }

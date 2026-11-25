@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { slugify } from "@/novels/slug";
+import { normalizeSlug, slugify } from "@/novels/slug";
 
 describe("slugify", () => {
   test("lowercases words and turns spaces into hyphens", () => {
@@ -13,4 +13,12 @@ describe("slugify", () => {
   test("uses novel when the title has no letters or digits", () => {
     expect(slugify("  ---  ")).toBe("novel");
   });
+});
+
+test("normalizeSlug returns nothing when no letters or digits remain", () => {
+  expect(normalizeSlug("  ---  ")).toBe("");
+});
+
+test("normalizeSlug stores My Novel as my-novel", () => {
+  expect(normalizeSlug("My Novel")).toBe("my-novel");
 });
