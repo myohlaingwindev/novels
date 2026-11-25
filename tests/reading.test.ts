@@ -114,7 +114,11 @@ describe("reading", () => {
       if (!signed.ok) throw new Error(signed.error);
       await setAdminByEmail(db, signed.user.email);
       actor = { ...signed.user, role: "admin" };
-      const novel = await createNovel(db, actor, novelInput({ hidden: false, titleMy: "နံနက်" }));
+      const novel = await createNovel(
+        db,
+        actor,
+        novelInput({ hidden: false, titleMy: "နံနက်", descriptionMy: "အစ", description: "A start" }),
+      );
       if (!novel.ok) throw new Error("novel failed");
       novelId = novel.novel.id;
       const reader = await signUp(db, { email: "reader@example.com", password: "password1" });
@@ -167,6 +171,10 @@ describe("reading", () => {
       if (!detail.ok) throw new Error("detail failed");
       expect(detail.chapters.map((chapter) => chapter.number)).toEqual([1]);
       expect(detail.chapters[0]?.title).toBe("1");
+      expect(detail.novel.title).toBe("နံနက်");
+      expect(detail.novel.description).toBe("အစ");
+      expect(detail.novel.title).not.toBe("Dawn");
+      expect(detail.novel.description).not.toBe("A start");
     });
 
     test("a novel with a blank Burmese title is skipped", async () => {
