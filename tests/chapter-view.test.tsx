@@ -6,15 +6,17 @@ describe("ChapterView", () => {
   test("renders the chapter text and escapes HTML", () => {
     const html = renderToStaticMarkup(
       <ChapterView
-        title="One"
-        body={"Hello\n\n<script>alert(1)</script>"}
+        title="တစ်"
+        body={"မင်္ဂလာပါ\n\n<script>alert(1)</script>"}
         novelSlug="dawn"
         prevNumber={null}
         nextNumber={2}
       />,
     );
-    expect(html).toContain("Hello");
+    expect(html).toContain('lang="my"');
+    expect(html).toContain("မင်္ဂလာပါ");
     expect(html).toContain("&lt;script&gt;");
+    expect(html).not.toContain("Source body");
     expect(html).toContain('href="/novels/dawn/chapters/2"');
     expect(html).not.toContain(">Previous<");
   });

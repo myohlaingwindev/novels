@@ -43,6 +43,7 @@ export async function getNovelDetail(db: AppDb, slug: string, readerId: number) 
       id: novel.id,
       title: novel.titleMy,
       description: novel.descriptionMy,
+      genre: novel.genre,
       slug: novel.slug,
     },
     chapters: (await listChapters(db, novel.id)).filter(visibleChapter).map((chapter) => ({
