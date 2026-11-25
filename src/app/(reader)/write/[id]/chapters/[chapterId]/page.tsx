@@ -16,8 +16,8 @@ export default async function EditChapterPage({
   const novelId = Number(id);
   const parsedChapterId = Number(chapterId);
   if (!Number.isInteger(novelId) || !Number.isInteger(parsedChapterId)) notFound();
-  const novel = getNovelById(getDatabase(), novelId);
-  const chapter = getChapterById(getDatabase(), parsedChapterId);
+  const novel = await getNovelById(getDatabase(), novelId);
+  const chapter = await getChapterById(getDatabase(), parsedChapterId);
   if (!novel || !chapter || chapter.novelId !== novel.id) notFound();
   if (novel.ownerId !== user.id) forbidden();
   return (
@@ -29,6 +29,9 @@ export default async function EditChapterPage({
         chapterId={chapter.id}
         title={chapter.title}
         body={chapter.body}
+        titleMy={chapter.titleMy}
+        bodyMy={chapter.bodyMy}
+        hidden={chapter.hidden}
         submitLabel="Save chapter"
       />
       <form action={deleteChapterAction}>

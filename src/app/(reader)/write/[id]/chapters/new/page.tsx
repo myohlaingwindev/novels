@@ -9,13 +9,22 @@ export default async function NewChapterPage({ params }: { params: Promise<{ id:
   const user = await requireUser();
   const novelId = Number((await params).id);
   if (!Number.isInteger(novelId)) notFound();
-  const novel = getNovelById(getDatabase(), novelId);
+  const novel = await getNovelById(getDatabase(), novelId);
   if (!novel) notFound();
   if (novel.ownerId !== user.id) forbidden();
   return (
     <main>
       <h1>New chapter</h1>
-      <ChapterForm action={createChapterAction} novelId={novel.id} title="" body="" submitLabel="Add chapter" />
+      <ChapterForm
+        action={createChapterAction}
+        novelId={novel.id}
+        title=""
+        body=""
+        titleMy=""
+        bodyMy=""
+        hidden
+        submitLabel="Add chapter"
+      />
     </main>
   );
 }

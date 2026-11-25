@@ -5,7 +5,17 @@ export default function NewNovelPage() {
   return (
     <main>
       <h1>New novel</h1>
-      <NovelForm action={createNovelAction} title="" description="" submitLabel="Create novel" />
+      <NovelForm
+        action={createNovelAction}
+        title=""
+        description=""
+        titleMy=""
+        descriptionMy=""
+        genre="xianxia"
+        hidden
+        slug=""
+        submitLabel="Create novel"
+      />
     </main>
   );
 }

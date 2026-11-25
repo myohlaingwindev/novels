@@ -11,3 +11,8 @@ export function chapterWriteError(error: "title" | "body" | "burmeseBody"): stri
   if (error === "body") return "Chapter text is required.";
   return "A Burmese chapter is required before this chapter can be shown.";
 }
+
+export function glossaryWriteError(error: "term" | "duplicate"): string {
+  if (error === "term") return "Enter a source term and a Burmese form.";
+  return "That term is already in this glossary.";
+}
