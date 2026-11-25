@@ -6,7 +6,8 @@ export function novelWriteError(error: "title" | "slug" | "duplicate" | "genre" 
   return "A Burmese title is required before this novel can be shown.";
 }
 
-export function chapterWriteError(error: "title" | "body"): string {
+export function chapterWriteError(error: "title" | "body" | "burmeseBody"): string {
   if (error === "title") return "Title is required.";
-  return "Chapter text is required.";
+  if (error === "body") return "Chapter text is required.";
+  return "A Burmese chapter is required before this chapter can be shown.";
 }

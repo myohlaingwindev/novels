@@ -3,7 +3,7 @@ import { setAdminByEmail, signUp } from "@/auth/users";
 import { createChapter, deleteChapter } from "@/novels/chapters";
 import { createNovel } from "@/novels/novels";
 import { listNovelsForLibrary, openChapter } from "@/reading/reading";
-import { novelInput, testDb } from "./helpers";
+import { chapterInput, novelInput, testDb } from "./helpers";
 
 describe("reading", () => {
   test("opening a later chapter replaces the saved chapter", async () => {
@@ -14,8 +14,8 @@ describe("reading", () => {
     const actor = { ...signed.user, role: "admin" as const };
     const novel = await createNovel(db, actor, novelInput({ description: "A start" }));
     if (!novel.ok) throw new Error("novel failed");
-    await createChapter(db, actor, novel.novel.id, { title: "A", body: "One" });
-    await createChapter(db, actor, novel.novel.id, { title: "B", body: "Two" });
+    await createChapter(db, actor, novel.novel.id, chapterInput({ title: "A", body: "One" }));
+    await createChapter(db, actor, novel.novel.id, chapterInput({ title: "B", body: "Two" }));
     const reader = await signUp(db, { email: "reader@example.com", password: "password1" });
     if (!reader.ok) throw new Error(reader.error);
     await openChapter(db, reader.user.id, "dawn", 1);
@@ -38,9 +38,9 @@ describe("reading", () => {
     const actor = { ...signed.user, role: "admin" as const };
     const novel = await createNovel(db, actor, novelInput());
     if (!novel.ok) throw new Error("novel failed");
-    await createChapter(db, actor, novel.novel.id, { title: "A", body: "One" });
-    const middle = await createChapter(db, actor, novel.novel.id, { title: "B", body: "Two" });
-    await createChapter(db, actor, novel.novel.id, { title: "C", body: "Three" });
+    await createChapter(db, actor, novel.novel.id, chapterInput({ title: "A", body: "One" }));
+    const middle = await createChapter(db, actor, novel.novel.id, chapterInput({ title: "B", body: "Two" }));
+    await createChapter(db, actor, novel.novel.id, chapterInput({ title: "C", body: "Three" }));
     if (!middle.ok) throw new Error("chapter failed");
     await deleteChapter(db, actor, middle.chapter.id);
     const opened = await openChapter(db, signed.user.id, "dawn", 3);
@@ -58,7 +58,7 @@ describe("reading", () => {
     const actor = { ...signed.user, role: "admin" as const };
     const novel = await createNovel(db, actor, novelInput());
     if (!novel.ok) throw new Error("novel failed");
-    const chapter = await createChapter(db, actor, novel.novel.id, { title: "A", body: "One" });
+    const chapter = await createChapter(db, actor, novel.novel.id, chapterInput({ title: "A", body: "One" }));
     if (!chapter.ok) throw new Error("chapter failed");
     await openChapter(db, signed.user.id, "dawn", 1);
     await deleteChapter(db, actor, chapter.chapter.id);

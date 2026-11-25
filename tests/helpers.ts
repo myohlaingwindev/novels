@@ -30,3 +30,14 @@ export function novelInput(overrides: Record<string, string | boolean> = {}) {
     ...overrides,
   };
 }
+
+export function chapterInput(overrides: Record<string, string | boolean> = {}) {
+  return {
+    title: "A",
+    body: "One",
+    titleMy: "",
+    bodyMy: "",
+    hidden: true,
+    ...overrides,
+  };
+}

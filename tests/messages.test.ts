@@ -10,5 +10,6 @@ describe("write errors", () => {
     expect(novelWriteError("burmeseTitle")).toBe("A Burmese title is required before this novel can be shown.");
     expect(chapterWriteError("title")).toBe("Title is required.");
     expect(chapterWriteError("body")).toBe("Chapter text is required.");
+    expect(chapterWriteError("burmeseBody")).toBe("A Burmese chapter is required before this chapter can be shown.");
   });
 });

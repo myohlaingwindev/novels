@@ -1,8 +1,8 @@
 import { describe, expect, test } from "vitest";
 import { setAdminByEmail, signUp } from "@/auth/users";
-import { createChapter, deleteChapter, listChapters } from "@/novels/chapters";
+import { createChapter, deleteChapter, listChapters, updateChapter } from "@/novels/chapters";
 import { createNovel } from "@/novels/novels";
-import { novelInput, testDb } from "./helpers";
+import { chapterInput, novelInput, testDb } from "./helpers";
 
 async function writer() {
   const db = await testDb();
@@ -18,19 +18,19 @@ async function writer() {
 describe("chapters", () => {
   test("numbers chapters from 1 and does not reuse a deleted number", async () => {
     const { db, actor, novelId } = await writer();
-    const first = await createChapter(db, actor, novelId, { title: "A", body: "One" });
-    const second = await createChapter(db, actor, novelId, { title: "B", body: "Two" });
-    const third = await createChapter(db, actor, novelId, { title: "C", body: "Three" });
+    const first = await createChapter(db, actor, novelId, chapterInput({ title: "A", body: "One" }));
+    const second = await createChapter(db, actor, novelId, chapterInput({ title: "B", body: "Two" }));
+    const third = await createChapter(db, actor, novelId, chapterInput({ title: "C", body: "Three" }));
     if (!first.ok || !second.ok || !third.ok) throw new Error("create failed");
     await deleteChapter(db, actor, second.chapter.id);
-    const fourth = await createChapter(db, actor, novelId, { title: "D", body: "Four" });
+    const fourth = await createChapter(db, actor, novelId, chapterInput({ title: "D", body: "Four" }));
     if (!fourth.ok) throw new Error("create failed");
     expect((await listChapters(db, novelId)).map((chapter) => chapter.number)).toEqual([1, 3, 4]);
   });
 
   test("rejects an empty chapter body", async () => {
     const { db, actor, novelId } = await writer();
-    expect(await createChapter(db, actor, novelId, { title: "A", body: "   " })).toEqual({
+    expect(await createChapter(db, actor, novelId, chapterInput({ title: "A", body: "   " }))).toEqual({
       ok: false,
       error: "body",
     });
@@ -38,7 +38,7 @@ describe("chapters", () => {
 
   test("another writer cannot delete the chapter", async () => {
     const { db, actor, novelId } = await writer();
-    const created = await createChapter(db, actor, novelId, { title: "A", body: "One" });
+    const created = await createChapter(db, actor, novelId, chapterInput({ title: "A", body: "One" }));
     if (!created.ok) throw new Error("create failed");
     const other = await signUp(db, { email: "other@example.com", password: "password1" });
     if (!other.ok) throw new Error(other.error);
@@ -47,5 +47,25 @@ describe("chapters", () => {
       error: "forbidden",
     });
     expect(await listChapters(db, novelId)).toHaveLength(1);
+  });
+
+  test("a new chapter starts hidden", async () => {
+    const { db, actor, novelId } = await writer();
+    const created = await createChapter(db, actor, novelId, chapterInput());
+    if (!created.ok) throw new Error("create failed");
+    expect(created.chapter.hidden).toBe(true);
+    expect(created.chapter.bodyMy).toBe("");
+  });
+
+  test("refuses to show a chapter without a Burmese body and does not change the row", async () => {
+    const { db, actor, novelId } = await writer();
+    const created = await createChapter(db, actor, novelId, chapterInput({ body: "Source" }));
+    if (!created.ok) throw new Error("create failed");
+    expect(await updateChapter(db, actor, created.chapter.id, chapterInput({ hidden: false, bodyMy: "   " }))).toEqual({
+      ok: false,
+      error: "burmeseBody",
+    });
+    expect((await listChapters(db, novelId))[0]?.body).toBe("Source");
+    expect((await listChapters(db, novelId))[0]?.hidden).toBe(true);
   });
 });
