@@ -1,0 +1,93 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id           BigInt     @id @default(autoincrement())
+  email        String     @unique
+  passwordHash String     @map("password_hash")
+  role         String
+  createdAt    BigInt     @map("created_at")
+  novels       Novel[]
+  progress     Progress[]
+  sessions     Session[]
+
+  @@map("users")
+}
+
+model Novel {
+  id            BigInt         @id @default(autoincrement())
+  ownerId       BigInt         @map("owner_id")
+  title         String
+  description   String         @default("")
+  titleMy       String         @default("") @map("title_my")
+  descriptionMy String         @default("") @map("description_my")
+  genre         String         @default("english")
+  hidden        Boolean        @default(true)
+  slug          String         @unique
+  createdAt     BigInt         @map("created_at")
+  updatedAt     BigInt         @map("updated_at")
+  owner         User           @relation(fields: [ownerId], references: [id])
+  chapters      Chapter[]
+  progress      Progress[]
+  glossary      GlossaryTerm[]
+
+  @@map("novels")
+}
+
+model Chapter {
+  id        BigInt     @id @default(autoincrement())
+  novelId   BigInt     @map("novel_id")
+  number    Int
+  title     String
+  body      String
+  titleMy   String     @default("") @map("title_my")
+  bodyMy    String     @default("") @map("body_my")
+  hidden    Boolean    @default(true)
+  createdAt BigInt     @map("created_at")
+  updatedAt BigInt     @map("updated_at")
+  novel     Novel      @relation(fields: [novelId], references: [id], onDelete: Cascade)
+  progress  Progress[]
+
+  @@unique([novelId, number])
+  @@map("chapters")
+}
+
+model GlossaryTerm {
+  id      BigInt @id @default(autoincrement())
+  novelId BigInt @map("novel_id")
+  source  String
+  burmese String
+  note    String @default("")
+  novel   Novel  @relation(fields: [novelId], references: [id], onDelete: Cascade)
+
+  @@unique([novelId, source])
+  @@map("glossary_terms")
+}
+
+model Progress {
+  userId    BigInt  @map("user_id")
+  novelId   BigInt  @map("novel_id")
+  chapterId BigInt  @map("chapter_id")
+  updatedAt BigInt  @map("updated_at")
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  novel     Novel   @relation(fields: [novelId], references: [id], onDelete: Cascade)
+  chapter   Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+
+  @@id([userId, novelId])
+  @@map("progress")
+}
+
+model Session {
+  idHash    String @id @map("id_hash")
+  userId    BigInt @map("user_id")
+  expiresAt BigInt @map("expires_at")
+  user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
