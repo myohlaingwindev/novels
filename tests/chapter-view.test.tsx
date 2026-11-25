@@ -14,6 +14,7 @@ describe("ChapterView", () => {
       />,
     );
     expect(html).toContain('lang="my"');
+    expect(html).toContain("တစ်");
     expect(html).toContain("မင်္ဂလာပါ");
     expect(html).toContain("&lt;script&gt;");
     expect(html).not.toContain("Source body");

@@ -29,36 +29,38 @@ export function ReaderChrome({ children }: { children: ReactNode }) {
 
   return (
     <div className="reader" data-font={fontSize} data-theme={theme}>
-      <label htmlFor="reader-font-size">Font size</label>
-      <select
-        id="reader-font-size"
-        value={fontSize}
-        onChange={(event) => {
-          const value = event.target.value;
-          if (value !== "small" && value !== "default" && value !== "large") return;
-          localStorage.setItem("novels-font-size", value);
-          setFontSize(value);
-        }}
-      >
-        <option value="small">small</option>
-        <option value="default">default</option>
-        <option value="large">large</option>
-      </select>
-      <label htmlFor="reader-theme">Theme</label>
-      <select
-        id="reader-theme"
-        value={theme}
-        onChange={(event) => {
-          const value = event.target.value;
-          if (value !== "light" && value !== "sepia" && value !== "dark") return;
-          localStorage.setItem("novels-theme", value);
-          setTheme(value);
-        }}
-      >
-        <option value="light">light</option>
-        <option value="sepia">sepia</option>
-        <option value="dark">dark</option>
-      </select>
+      <div className="reader-controls">
+        <label htmlFor="reader-font-size">Font size</label>
+        <select
+          id="reader-font-size"
+          value={fontSize}
+          onChange={(event) => {
+            const value = event.target.value;
+            if (value !== "small" && value !== "default" && value !== "large") return;
+            localStorage.setItem("novels-font-size", value);
+            setFontSize(value);
+          }}
+        >
+          <option value="small">small</option>
+          <option value="default">default</option>
+          <option value="large">large</option>
+        </select>
+        <label htmlFor="reader-theme">Theme</label>
+        <select
+          id="reader-theme"
+          value={theme}
+          onChange={(event) => {
+            const value = event.target.value;
+            if (value !== "light" && value !== "sepia" && value !== "dark") return;
+            localStorage.setItem("novels-theme", value);
+            setTheme(value);
+          }}
+        >
+          <option value="light">light</option>
+          <option value="sepia">sepia</option>
+          <option value="dark">dark</option>
+        </select>
+      </div>
       {children}
     </div>
   );

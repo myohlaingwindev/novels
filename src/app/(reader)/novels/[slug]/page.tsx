@@ -25,7 +25,9 @@ export default async function NovelPage({ params }: { params: Promise<{ slug: st
         {detail.chapters.map((chapter) => (
           <li key={chapter.id}>
             <Link href={`/novels/${detail.novel.slug}/chapters/${chapter.number}`}>
-              {chapter.number}. {chapter.title}
+              {chapter.title === String(chapter.number)
+                ? chapter.number
+                : `${chapter.number}. ${chapter.title}`}
             </Link>
           </li>
         ))}
