@@ -1,9 +1,20 @@
+import { PrismaNeon } from "@prisma/adapter-neon";
+import { neonConfig } from "@neondatabase/serverless";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@/generated/prisma/client";
 
 const clients = new Map<string, PrismaClient>();
 
+function isNeon(url: string) {
+  return url.includes(".neon.tech");
+}
+
 export function createDatabase(url: string, schema?: string) {
+  if (!schema && isNeon(url)) {
+    neonConfig.webSocketConstructor = WebSocket;
+    neonConfig.poolQueryViaFetch = true;
+    return new PrismaClient({ adapter: new PrismaNeon({ connectionString: url }) });
+  }
   const adapter = new PrismaPg({ connectionString: url }, schema ? { schema } : undefined);
   return new PrismaClient({ adapter });
 }
