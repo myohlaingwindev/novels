@@ -25,15 +25,8 @@
       },
       "issues": {
         "enabled": true
-      },
-      
-  },
-  "hyperdrive": [
-        {
-          "binding": "MY_NOVELS",
-          "id": "d96e6c9cb513495aae6ce14e54885fa1"
-        }
-      ],
+      }
+    },
   "vars": {
     "OPEN_NEXT_USE_WEB_SOCKETS": "true"
   }
