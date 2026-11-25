@@ -27,7 +27,14 @@
         "enabled": true
       }
     },
-  "vars": {
-    "OPEN_NEXT_USE_WEB_SOCKETS": "true"
-  }
+    "hyperdrive": [
+      {
+        "binding": "MY_NOVELS2",
+        "id": "d96e6c9cb513495aae6ce14e54885fa1",
+        "localConnectionString": "postgresql://novels:novels-local@127.0.0.1:5432/novels"
+      }
+    ],
+    "vars": {
+      "OPEN_NEXT_USE_WEB_SOCKETS": "true"
+    }
 }
