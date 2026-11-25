@@ -7,7 +7,7 @@ import { setAuthorAction } from "./actions";
 export default async function UsersPage() {
   const user = await requireUser();
   if (user.role !== "admin") forbidden();
-  const accounts = listUsers(getDatabase());
+  const accounts = await listUsers(getDatabase());
   return (
     <main>
       <h1>Users</h1>

@@ -8,7 +8,7 @@ export async function currentUser() {
   const jar = await cookies();
   const sessionId = jar.get(sessionCookie.name)?.value;
   if (!sessionId) return null;
-  return getUserBySession(getDatabase(), sessionId);
+  return await getUserBySession(getDatabase(), sessionId);
 }
 
 export async function requireUser() {

@@ -1,6 +1,4 @@
-import { eq } from "drizzle-orm";
 import type { AppDb } from "@/db/client";
-import { users } from "@/db/schema";
 import type { Role } from "@/auth/access";
 import { hashPassword, verifyPassword } from "@/auth/password";
 import { normalizeEmail } from "@/auth/validators";
@@ -14,79 +12,78 @@ export type PublicUser = {
 
 const LOGIN_ERROR = "Email or password is incorrect.";
 
-function toPublic(row: { id: number; email: string; role: Role; createdAt: number }): PublicUser {
-  return { id: row.id, email: row.email, role: row.role, createdAt: row.createdAt };
+function toPublic(row: { id: bigint; email: string; role: string; createdAt: bigint }): PublicUser {
+  return {
+    id: Number(row.id),
+    email: row.email,
+    role: row.role as Role,
+    createdAt: Number(row.createdAt),
+  };
 }
 
-export function signUp(
+export async function signUp(
   db: AppDb,
   input: { email: string; password: string; role?: string },
-): { ok: true; user: PublicUser } | { ok: false; error: string } {
+): Promise<{ ok: true; user: PublicUser } | { ok: false; error: string }> {
   const email = normalizeEmail(input.email);
   if (!email) return { ok: false, error: "Enter a valid email." };
   if (input.password.length < 8) {
     return { ok: false, error: "Password must be at least 8 characters." };
   }
-  const existing = db.select().from(users).where(eq(users.email, email)).get();
+  const existing = await db.user.findUnique({ where: { email } });
   if (existing) return { ok: false, error: "An account with that email already exists." };
-  const row = db
-    .insert(users)
-    .values({
+  const row = await db.user.create({
+    data: {
       email,
       passwordHash: hashPassword(input.password),
       role: "user",
       createdAt: Date.now(),
-    })
-    .returning()
-    .all()[0];
+    },
+  });
   return { ok: true, user: toPublic(row) };
 }
 
-export function logIn(
+export async function logIn(
   db: AppDb,
   email: string,
   password: string,
-): { ok: true; user: PublicUser } | { ok: false; error: string } {
+): Promise<{ ok: true; user: PublicUser } | { ok: false; error: string }> {
   const normalized = normalizeEmail(email);
   if (!normalized) return { ok: false, error: LOGIN_ERROR };
-  const row = db.select().from(users).where(eq(users.email, normalized)).get();
+  const row = await db.user.findUnique({ where: { email: normalized } });
   if (!row || !verifyPassword(password, row.passwordHash)) {
     return { ok: false, error: LOGIN_ERROR };
   }
   return { ok: true, user: toPublic(row) };
 }
 
-export function setAdminByEmail(
+export async function setAdminByEmail(
   db: AppDb,
   email: string,
-): { ok: true; email: string } | { ok: false; error: string } {
+): Promise<{ ok: true; email: string } | { ok: false; error: string }> {
   const normalized = normalizeEmail(email);
   if (!normalized) return { ok: false, error: "Enter a valid email." };
-  const row = db.select().from(users).where(eq(users.email, normalized)).get();
+  const row = await db.user.findUnique({ where: { email: normalized } });
   if (!row) return { ok: false, error: "No account for that email. Sign up first." };
-  db.update(users).set({ role: "admin" }).where(eq(users.id, row.id)).run();
+  await db.user.update({ where: { id: row.id }, data: { role: "admin" } });
   return { ok: true, email: normalized };
 }
 
-export function setAuthorGrant(
+export async function setAuthorGrant(
   db: AppDb,
   actorRole: Role,
   userId: number,
   grant: boolean,
-): { ok: true } | { ok: false; error: "forbidden" | "missing" | "is_admin" } {
+): Promise<{ ok: true } | { ok: false; error: "forbidden" | "missing" | "is_admin" }> {
   if (actorRole !== "admin") return { ok: false, error: "forbidden" };
-  const row = db.select().from(users).where(eq(users.id, userId)).get();
+  const row = await db.user.findUnique({ where: { id: userId } });
   if (!row) return { ok: false, error: "missing" };
   if (row.role === "admin") return { ok: false, error: "is_admin" };
-  db.update(users).set({ role: grant ? "author" : "user" }).where(eq(users.id, userId)).run();
+  await db.user.update({ where: { id: row.id }, data: { role: grant ? "author" : "user" } });
   return { ok: true };
 }
 
-export function listUsers(db: AppDb): PublicUser[] {
-  return db
-    .select()
-    .from(users)
-    .all()
-    .map((row) => toPublic(row))
-    .sort((a, b) => a.email.localeCompare(b.email));
+export async function listUsers(db: AppDb): Promise<PublicUser[]> {
+  const rows = await db.user.findMany({ orderBy: { email: "asc" } });
+  return rows.map((row) => toPublic(row));
 }

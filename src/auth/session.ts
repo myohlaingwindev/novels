@@ -1,8 +1,7 @@
 import { createHash, randomBytes } from "node:crypto";
-import { eq } from "drizzle-orm";
 import type { AppDb } from "@/db/client";
-import { sessions, users } from "@/db/schema";
 import type { PublicUser } from "@/auth/users";
+import type { Role } from "@/auth/access";
 
 const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
 
@@ -10,26 +9,31 @@ function hashSessionId(sessionId: string): string {
   return createHash("sha256").update(sessionId).digest("hex");
 }
 
-export function createSession(db: AppDb, userId: number, now = Date.now()): string {
+export async function createSession(db: AppDb, userId: number, now = Date.now()): Promise<string> {
   const sessionId = randomBytes(32).toString("hex");
-  db.insert(sessions)
-    .values({
+  await db.session.create({
+    data: {
       idHash: hashSessionId(sessionId),
       userId,
       expiresAt: now + THIRTY_DAYS_MS,
-    })
-    .run();
+    },
+  });
   return sessionId;
 }
 
-export function getUserBySession(db: AppDb, sessionId: string, now = Date.now()): PublicUser | null {
-  const row = db.select().from(sessions).where(eq(sessions.idHash, hashSessionId(sessionId))).get();
-  if (!row || row.expiresAt <= now) return null;
-  const user = db.select().from(users).where(eq(users.id, row.userId)).get();
+export async function getUserBySession(db: AppDb, sessionId: string, now = Date.now()): Promise<PublicUser | null> {
+  const row = await db.session.findUnique({ where: { idHash: hashSessionId(sessionId) } });
+  if (!row || Number(row.expiresAt) <= now) return null;
+  const user = await db.user.findUnique({ where: { id: row.userId } });
   if (!user) return null;
-  return { id: user.id, email: user.email, role: user.role, createdAt: user.createdAt };
+  return {
+    id: Number(user.id),
+    email: user.email,
+    role: user.role as Role,
+    createdAt: Number(user.createdAt),
+  };
 }
 
-export function destroySession(db: AppDb, sessionId: string): void {
-  db.delete(sessions).where(eq(sessions.idHash, hashSessionId(sessionId))).run();
+export async function destroySession(db: AppDb, sessionId: string): Promise<void> {
+  await db.session.deleteMany({ where: { idHash: hashSessionId(sessionId) } });
 }

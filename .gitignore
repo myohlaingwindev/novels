@@ -2,3 +2,5 @@ node_modules
 .next
 data
 *.tsbuildinfo
+.env
+src/generated

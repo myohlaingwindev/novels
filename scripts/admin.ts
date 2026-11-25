@@ -1,4 +1,4 @@
-import { openDatabase } from "@/db/client";
+import { getDatabase } from "@/db/client";
 import { setAdminByEmail } from "@/auth/users";
 
 const email = process.argv[2];
@@ -7,10 +7,15 @@ if (!email) {
   process.exit(1);
 }
 
-const db = openDatabase(process.env.DATABASE_PATH ?? "data/novels.db");
-const result = setAdminByEmail(db, email);
-if (!result.ok) {
-  console.error(result.error);
-  process.exit(1);
+async function main() {
+  const db = getDatabase();
+  const result = await setAdminByEmail(db, email);
+  await db.$disconnect();
+  if (!result.ok) {
+    console.error(result.error);
+    process.exit(1);
+  }
+  console.log(`Admin set for ${result.email}`);
 }
-console.log(`Admin set for ${result.email}`);
+
+void main();

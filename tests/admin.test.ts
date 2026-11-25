@@ -1,10 +1,9 @@
 import { execFileSync } from "node:child_process";
-import { mkdtempSync, readdirSync, readFileSync, statSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, test } from "vitest";
 import { listUsers, setAdminByEmail, setAuthorGrant, signUp } from "@/auth/users";
-import { testDb } from "./helpers";
+import { testDatabaseUrl, testDb } from "./helpers";
 
 function collect(dir: string): string[] {
   return readdirSync(dir).flatMap((name) => {
@@ -16,18 +15,18 @@ function collect(dir: string): string[] {
 }
 
 describe("admin promotion", () => {
-  test("sets admin on an existing account", () => {
-    const db = testDb();
-    signUp(db, { email: "owner@example.com", password: "password1" });
-    expect(setAdminByEmail(db, "Owner@Example.com")).toEqual({
+  test("sets admin on an existing account", async () => {
+    const db = await testDb();
+    await signUp(db, { email: "owner@example.com", password: "password1" });
+    expect(await setAdminByEmail(db, "Owner@Example.com")).toEqual({
       ok: true,
       email: "owner@example.com",
     });
-    expect(listUsers(db)[0]?.role).toBe("admin");
+    expect((await listUsers(db))[0]?.role).toBe("admin");
   });
 
-  test("refuses an unknown email", () => {
-    const result = setAdminByEmail(testDb(), "missing@example.com");
+  test("refuses an unknown email", async () => {
+    const result = await setAdminByEmail(await testDb(), "missing@example.com");
     expect(result).toEqual({
       ok: false,
       error: "No account for that email. Sign up first.",
@@ -35,10 +34,9 @@ describe("admin promotion", () => {
   });
 
   test("the command prints the sign-up message for an unknown email", () => {
-    const dbPath = join(mkdtempSync(join(tmpdir(), "novels-")), "novels.db");
     expect(() =>
-      execFileSync("./node_modules/.bin/tsx", ["scripts/admin.ts", "missing@example.com"], {
-        env: { ...process.env, DATABASE_PATH: dbPath },
+      execFileSync("node", ["--env-file=.env", "--import", "tsx", "scripts/admin.ts", "missing@example.com"], {
+        env: { ...process.env, DATABASE_URL: testDatabaseUrl },
         encoding: "utf8",
       }),
     ).toThrow(/No account for that email\. Sign up first\./);
@@ -55,31 +53,31 @@ describe("admin promotion", () => {
 });
 
 describe("author grants", () => {
-  test("an admin can grant and revoke author", () => {
-    const db = testDb();
-    const admin = signUp(db, { email: "owner@example.com", password: "password1" });
-    const reader = signUp(db, { email: "reader@example.com", password: "password1" });
+  test("an admin can grant and revoke author", async () => {
+    const db = await testDb();
+    const admin = await signUp(db, { email: "owner@example.com", password: "password1" });
+    const reader = await signUp(db, { email: "reader@example.com", password: "password1" });
     if (!admin.ok || !reader.ok) throw new Error("signup failed");
-    setAdminByEmail(db, admin.user.email);
-    expect(setAuthorGrant(db, "admin", reader.user.id, true)).toEqual({ ok: true });
-    expect(listUsers(db).find((user) => user.id === reader.user.id)?.role).toBe("author");
-    expect(setAuthorGrant(db, "admin", reader.user.id, false)).toEqual({ ok: true });
-    expect(listUsers(db).find((user) => user.id === reader.user.id)?.role).toBe("user");
+    await setAdminByEmail(db, admin.user.email);
+    expect(await setAuthorGrant(db, "admin", reader.user.id, true)).toEqual({ ok: true });
+    expect((await listUsers(db)).find((user) => user.id === reader.user.id)?.role).toBe("author");
+    expect(await setAuthorGrant(db, "admin", reader.user.id, false)).toEqual({ ok: true });
+    expect((await listUsers(db)).find((user) => user.id === reader.user.id)?.role).toBe("user");
   });
 
-  test("a non-admin cannot grant author", () => {
-    const db = testDb();
-    const reader = signUp(db, { email: "reader@example.com", password: "password1" });
+  test("a non-admin cannot grant author", async () => {
+    const db = await testDb();
+    const reader = await signUp(db, { email: "reader@example.com", password: "password1" });
     if (!reader.ok) throw new Error(reader.error);
-    expect(setAuthorGrant(db, "user", reader.user.id, true)).toEqual({ ok: false, error: "forbidden" });
+    expect(await setAuthorGrant(db, "user", reader.user.id, true)).toEqual({ ok: false, error: "forbidden" });
   });
 
-  test("the user list does not change an admin", () => {
-    const db = testDb();
-    const admin = signUp(db, { email: "owner@example.com", password: "password1" });
+  test("the user list does not change an admin", async () => {
+    const db = await testDb();
+    const admin = await signUp(db, { email: "owner@example.com", password: "password1" });
     if (!admin.ok) throw new Error(admin.error);
-    setAdminByEmail(db, admin.user.email);
-    expect(setAuthorGrant(db, "admin", admin.user.id, false)).toEqual({ ok: false, error: "is_admin" });
-    expect(listUsers(db)[0]?.role).toBe("admin");
+    await setAdminByEmail(db, admin.user.email);
+    expect(await setAuthorGrant(db, "admin", admin.user.id, false)).toEqual({ ok: false, error: "is_admin" });
+    expect((await listUsers(db))[0]?.role).toBe("admin");
   });
 });
