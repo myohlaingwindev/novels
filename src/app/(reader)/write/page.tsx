@@ -4,6 +4,7 @@ import { getDatabase } from "@/db/client";
 import { listGenres } from "@/novels/genre";
 import { listOwnedNovels } from "@/novels/novels";
 import { GenreManager } from "./genre-form";
+import { PenNameForm } from "./pen-name-form";
 
 export default async function WriteIndexPage() {
   const user = await requireUser();
@@ -21,6 +22,7 @@ export default async function WriteIndexPage() {
           Publish a novel
         </Link>
       </div>
+      <PenNameForm name={user.name} />
       {novels.length === 0 ? <p>No novels yet.</p> : null}
       <div className="chapter-card">
         {novels.map((novel, index) => (

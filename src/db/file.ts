@@ -6,6 +6,7 @@ import { PrismaClient } from "@/generated/prisma/client";
 
 const require = createRequire(import.meta.url);
 const migrationPath = path.join(process.cwd(), "prisma/migrations/20261126160000_init/migration.sql");
+const sourceImportPath = path.join(process.cwd(), "prisma/migrations/20261127010000_source_import/migration.sql");
 const prepared = new Set<string>();
 
 export function createFileDatabase(url: string) {
@@ -18,7 +19,7 @@ function prepareFile(url: string) {
   const Database = require("better-sqlite3") as new (filename: string) => {
     pragma: (source: string) => unknown;
     exec: (source: string) => void;
-    prepare: (source: string) => { get: () => unknown };
+    prepare: (source: string) => { get: () => unknown; all: () => unknown[] };
     close: () => void;
   };
   const file = url.replace(/^file:/, "");
@@ -28,6 +29,18 @@ function prepareFile(url: string) {
     sqlite.pragma("foreign_keys = ON");
     sqlite.exec(readFileSync(migrationPath, "utf8"));
   }
+  addMissingColumns(sqlite);
   sqlite.close();
   prepared.add(url);
+}
+
+function addMissingColumns(sqlite: {
+  exec: (source: string) => void;
+  prepare: (source: string) => { all: () => unknown[] };
+}) {
+  const columns = new Set((sqlite.prepare("PRAGMA table_info(novels)").all() as { name: string }[]).map((column) => column.name));
+  for (const statement of readFileSync(sourceImportPath, "utf8").split(";")) {
+    const column = /ADD COLUMN\s+(\w+)/i.exec(statement)?.[1];
+    if (column && !columns.has(column)) sqlite.exec(`${statement.trim()};`);
+  }
 }

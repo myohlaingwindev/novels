@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Cover } from "@/reading/cover-card";
+import { CreditLines } from "@/reading/credit-lines";
 import { readingPercent } from "@/reading/progress";
 
 export function ContinueCard({
@@ -10,6 +11,7 @@ export function ContinueCard({
     slug: string;
     title: string;
     authorName: string;
+    originAuthor: string;
     continueNumber: number;
     continuePosition: number;
     chapterCount: number;
@@ -25,7 +27,10 @@ export function ContinueCard({
       <div className="continue-copy">
         <div className="continue-title">{novel.title}</div>
         <div className="continue-meta">
-          {novel.authorName} · Chapter {novel.continuePosition} of {novel.chapterCount}
+          <CreditLines originAuthor={novel.originAuthor} penName={novel.authorName} />
+          <div>
+            Chapter {novel.continuePosition} of {novel.chapterCount}
+          </div>
         </div>
         <div
           className="progress"

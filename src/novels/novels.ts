@@ -3,6 +3,7 @@ import { forget, libraryCatalogKey } from "@/db/memory-cache";
 import type { Role } from "@/auth/access";
 import { canWrite } from "@/auth/access";
 import { genreExists } from "@/novels/genre";
+import { parseSelector } from "@/novels/selector";
 import { normalizeSlug } from "@/novels/slug";
 
 export type NovelInput = {
@@ -12,6 +13,10 @@ export type NovelInput = {
   genre: string;
   titleMy: string;
   descriptionMy: string;
+  sourceTitle: string;
+  sourceContent: string;
+  sourceAuthor: string;
+  originAuthor: string;
   hidden: boolean;
 };
 
@@ -22,6 +27,10 @@ export type Novel = {
   description: string;
   titleMy: string;
   descriptionMy: string;
+  sourceTitle: string;
+  sourceContent: string;
+  sourceAuthor: string;
+  originAuthor: string;
   genre: string;
   hidden: boolean;
   slug: string;
@@ -31,6 +40,17 @@ export type Novel = {
 
 type Actor = { id: number; role: Role };
 
+function sourceFields(input: Pick<NovelInput, "sourceTitle" | "sourceContent" | "sourceAuthor" | "originAuthor">) {
+  const selectors = [input.sourceTitle, input.sourceContent, input.sourceAuthor];
+  if (selectors.some((value) => !parseSelector(value).ok)) return null;
+  return {
+    sourceTitle: input.sourceTitle.trim(),
+    sourceContent: input.sourceContent.trim(),
+    sourceAuthor: input.sourceAuthor.trim(),
+    originAuthor: input.originAuthor.trim(),
+  };
+}
+
 function toNovel(row: {
   id: bigint;
   ownerId: bigint;
@@ -38,6 +58,10 @@ function toNovel(row: {
   description: string;
   titleMy: string;
   descriptionMy: string;
+  sourceTitle: string;
+  sourceContent: string;
+  sourceAuthor: string;
+  originAuthor: string;
   genre: string;
   hidden: boolean;
   slug: string;
@@ -51,6 +75,10 @@ function toNovel(row: {
     description: row.description,
     titleMy: row.titleMy,
     descriptionMy: row.descriptionMy,
+    sourceTitle: row.sourceTitle,
+    sourceContent: row.sourceContent,
+    sourceAuthor: row.sourceAuthor,
+    originAuthor: row.originAuthor,
     genre: row.genre,
     hidden: row.hidden,
     slug: row.slug,
@@ -78,11 +106,12 @@ export async function createNovel(
   db: AppDb,
   actor: Actor,
   input: NovelInput,
-): Promise<{ ok: true; novel: Novel } | { ok: false; error: "forbidden" | "title" | "slug" | "duplicate" | "genre" | "burmeseTitle" }> {
+): Promise<{ ok: true; novel: Novel } | { ok: false; error: "forbidden" | "slug" | "duplicate" | "genre" | "selector" | "burmeseTitle" }> {
   if (!canWrite(actor.role)) return { ok: false, error: "forbidden" };
   const title = input.title.trim();
-  if (!title) return { ok: false, error: "title" };
   if (!(await genreExists(db, input.genre))) return { ok: false, error: "genre" };
+  const source = sourceFields(input);
+  if (!source) return { ok: false, error: "selector" };
   const titleMy = input.titleMy.trim();
   if (!input.hidden && !titleMy) return { ok: false, error: "burmeseTitle" };
   const slug = normalizeSlug(input.slug);
@@ -96,6 +125,7 @@ export async function createNovel(
       description: input.description.trim(),
       titleMy,
       descriptionMy: input.descriptionMy.trim(),
+      ...source,
       genre: input.genre,
       hidden: input.hidden,
       slug,
@@ -113,15 +143,16 @@ export async function updateNovel(
   novelId: number,
   input: Omit<NovelInput, "slug">,
 ): Promise<
-  { ok: true; novel: Novel } | { ok: false; error: "forbidden" | "missing" | "title" | "genre" | "burmeseTitle" }
+  { ok: true; novel: Novel } | { ok: false; error: "forbidden" | "missing" | "genre" | "selector" | "burmeseTitle" }
 > {
   if (!canWrite(actor.role)) return { ok: false, error: "forbidden" };
   const current = await db.novel.findUnique({ where: { id: novelId } });
   if (!current) return { ok: false, error: "missing" };
   if (Number(current.ownerId) !== actor.id) return { ok: false, error: "forbidden" };
   const title = input.title.trim();
-  if (!title) return { ok: false, error: "title" };
   if (!(await genreExists(db, input.genre))) return { ok: false, error: "genre" };
+  const source = sourceFields(input);
+  if (!source) return { ok: false, error: "selector" };
   const titleMy = input.titleMy.trim();
   if (!input.hidden && !titleMy) return { ok: false, error: "burmeseTitle" };
   const row = await db.novel.update({
@@ -131,6 +162,7 @@ export async function updateNovel(
       description: input.description.trim(),
       titleMy,
       descriptionMy: input.descriptionMy.trim(),
+      ...source,
       genre: input.genre,
       hidden: input.hidden,
       updatedAt: Date.now(),

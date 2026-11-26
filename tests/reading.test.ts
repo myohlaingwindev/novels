@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, test } from "vitest";
-import { setAdminByEmail, signUp } from "@/auth/users";
+import { setAdminByEmail, setPenName, signUp } from "@/auth/users";
 import { createChapter, deleteChapter, updateChapter } from "@/novels/chapters";
 import { createNovel } from "@/novels/novels";
 import { getNovelDetail, listNovelsForLibrary, openChapter } from "@/reading/reading";
@@ -11,11 +11,18 @@ describe("reading", () => {
     const signed = await signUp(db, { email: "owner@example.com", password: "password1" });
     if (!signed.ok) throw new Error(signed.error);
     await setAdminByEmail(db, signed.user.email);
+    await setPenName(db, signed.user.id, "Mara");
     const actor = { ...signed.user, role: "admin" as const };
     const novel = await createNovel(
       db,
       actor,
-      novelInput({ hidden: false, titleMy: "နံနက်", descriptionMy: "အစ", description: "A start" }),
+      novelInput({
+        hidden: false,
+        titleMy: "နံနက်",
+        descriptionMy: "အစ",
+        description: "A start",
+        originAuthor: "Origin",
+      }),
     );
     if (!novel.ok) throw new Error("novel failed");
     await createChapter(
@@ -41,6 +48,10 @@ describe("reading", () => {
       slug: "dawn",
       chapterCount: 1,
       continueNumber: 1,
+    });
+    expect(library[0]).toMatchObject({
+      authorName: "Mara",
+      originAuthor: "Origin",
     });
   });
 
@@ -191,6 +202,14 @@ describe("reading", () => {
       expect(detail.novel.description).toBe("အစ");
       expect(detail.novel.title).not.toBe("Dawn");
       expect(detail.novel.description).not.toBe("A start");
+    });
+
+    test("a visible novel with a blank original author returns an empty originAuthor", async () => {
+      const library = await listNovelsForLibrary(db, readerId);
+      expect(library[0]?.originAuthor).toBe("");
+      const detail = await getNovelDetail(db, "dawn", readerId);
+      if (!detail.ok) throw new Error("detail failed");
+      expect(detail.novel.originAuthor).toBe("");
     });
 
     test("a novel with a blank Burmese title is skipped", async () => {

@@ -30,6 +30,10 @@ model Novel {
   description   String         @default("")
   titleMy       String         @default("") @map("title_my")
   descriptionMy String         @default("") @map("description_my")
+  sourceTitle   String         @default("") @map("source_title")
+  sourceContent String         @default("") @map("source_content")
+  sourceAuthor  String         @default("") @map("source_author")
+  originAuthor  String         @default("") @map("origin_author")
   genre         String         @default("english")
   hidden        Boolean        @default(true)
   slug          String         @unique

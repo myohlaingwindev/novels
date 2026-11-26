@@ -23,18 +23,9 @@ export function Header({ user }: { user: PublicUser }) {
         <Link href="/" className="wordmark">
           Novelle
         </Link>
-        <button
-          type="button"
-          className="menu-button"
-          aria-label={open ? "Close menu" : "Open menu"}
-          aria-expanded={open}
-          onClick={() => setOpen((value) => !value)}
-        >
-          {open ? "✕" : "☰"}
-        </button>
         <nav className="nav-links">
           <Link href="/" aria-current={path === "/" ? "page" : undefined} onClick={() => setOpen(false)}>
-            Library
+            Discover
           </Link>
           <Link href="/reading" aria-current={path === "/reading" ? "page" : undefined} onClick={() => setOpen(false)}>
             Reading
@@ -53,18 +44,43 @@ export function Header({ user }: { user: PublicUser }) {
             </Link>
           ) : null}
         </nav>
-        <div className="nav-account">
-          <span className="signed-in">{name}</span>
-          <span className="avatar avatar-sm" aria-hidden="true">
-            {authorInitials(name)}
-          </span>
-          <form className="nav-logout" action={logoutAction}>
-            <button type="submit">Log out</button>
-          </form>
+        <div className="nav-end">
+          <Link
+            href="/credits"
+            className="credit-pill"
+            aria-current={path === "/credits" ? "page" : undefined}
+            onClick={() => setOpen(false)}
+          >
+            0 credits
+          </Link>
+          <div className="nav-account">
+            <span className="signed-in">{name}</span>
+            <span className="avatar avatar-sm" aria-hidden="true">
+              {authorInitials(name)}
+            </span>
+            <form className="nav-logout" action={logoutAction}>
+              <button type="submit">Log out</button>
+            </form>
+          </div>
+          <button
+            type="button"
+            className="menu-button"
+            aria-label={open ? "Close menu" : "Open menu"}
+            aria-expanded={open}
+            onClick={() => setOpen((value) => !value)}
+          >
+            {open ? "✕" : "☰"}
+          </button>
         </div>
       </div>
     </header>
   );
+}
+
+export function SiteFooter() {
+  const path = usePathname();
+  if (readingPath(path) || path.startsWith("/admin")) return null;
+  return <footer className="site-footer">© Novelle</footer>;
 }
 
 export function BottomNav({ user }: { user: PublicUser }) {
@@ -73,7 +89,7 @@ export function BottomNav({ user }: { user: PublicUser }) {
   return (
     <nav className="bottom-nav" aria-label="Main">
       <Link href="/" aria-current={path === "/" ? "page" : undefined}>
-        Library
+        Discover
       </Link>
       <Link href="/reading" aria-current={path === "/reading" ? "page" : undefined}>
         Reading

@@ -5,6 +5,7 @@ import { getDatabase } from "@/db/client";
 import { genreLabel, listGenres } from "@/novels/genre";
 import { authorInitials } from "@/reading/author";
 import { Cover } from "@/reading/cover-card";
+import { CreditLines } from "@/reading/credit-lines";
 import { chapterPage } from "@/reading/pages";
 import { isFavorite } from "@/reading/favorites";
 import { getNovelDetail, listNovelsForLibrary } from "@/reading/reading";
@@ -39,7 +40,7 @@ export default async function NovelPage({
   return (
     <main className="novel">
       <nav className="crumbs" aria-label="Breadcrumb">
-        <Link href="/">Library</Link>
+        <Link href="/">Discover</Link>
         <span aria-hidden="true">/</span>
         <Link href={`/?genre=${detail.novel.genre}`}>{genre}</Link>
         <span aria-hidden="true">/</span>
@@ -47,12 +48,14 @@ export default async function NovelPage({
       </nav>
       <section className="novel-hero">
         <div className="novel-cover">
-          <Cover slug={detail.novel.slug} title={detail.novel.title} kicker={genre} byline={detail.novel.authorName} />
+          <Cover slug={detail.novel.slug} title={detail.novel.title} kicker={genre} />
         </div>
         <div className="novel-copy">
           <span className="kicker">{genre} novel</span>
           <h1>{detail.novel.title}</h1>
-          <p className="byline">by {detail.novel.authorName}</p>
+          <div className="byline">
+            <CreditLines originAuthor={detail.novel.originAuthor} penName={detail.novel.authorName} />
+          </div>
           <div className="stats">
             <div>
               <div className="stat-label">Chapters</div>
@@ -142,11 +145,17 @@ export default async function NovelPage({
               {authorInitials(detail.novel.authorName)}
             </div>
             <div>
-              <div className="author-name">{detail.novel.authorName}</div>
+              <div className="author-name">
+                <CreditLines originAuthor={detail.novel.originAuthor} penName={detail.novel.authorName} />
+              </div>
               <div className="card-meta">{authorCount} novels</div>
             </div>
           </div>
         </aside>
+      </section>
+      <section className="reviews" aria-labelledby="reviews-heading">
+        <h2 id="reviews-heading">Reviews</h2>
+        <p>Only readers who have read part of this novel can leave a review.</p>
       </section>
       {related.length > 0 ? (
         <section className="more">
@@ -154,14 +163,13 @@ export default async function NovelPage({
           <div className="catalog more-row">
             {related.map((novel) => (
               <Link key={novel.id} className="card" href={`/novels/${novel.slug}`}>
-                <Cover
-                  slug={novel.slug}
-                  title={novel.title}
-                  kicker={genreLabel(genreList, novel.genre)}
-                  byline={novel.authorName}
-                />
-                <div className="card-title">{novel.title}</div>
-                <div className="card-meta">{novel.authorName}</div>
+                <Cover slug={novel.slug} title={novel.title} kicker={genreLabel(genreList, novel.genre)} />
+                <div>
+                  <div className="card-title">{novel.title}</div>
+                  <div className="card-meta">
+                    <CreditLines originAuthor={novel.originAuthor} penName={novel.authorName} />
+                  </div>
+                </div>
               </Link>
             ))}
           </div>

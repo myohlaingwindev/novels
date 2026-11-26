@@ -28,12 +28,12 @@ describe("chapters", () => {
     expect((await listChapters(db, novelId)).map((chapter) => chapter.number)).toEqual([1, 3, 4]);
   });
 
-  test("rejects an empty chapter body", async () => {
+  test("stores a chapter with a blank English title and body", async () => {
     const { db, actor, novelId } = await writer();
-    expect(await createChapter(db, actor, novelId, chapterInput({ title: "A", body: "   " }))).toEqual({
-      ok: false,
-      error: "body",
-    });
+    const created = await createChapter(db, actor, novelId, chapterInput({ title: "   ", body: "" }));
+    if (!created.ok) throw new Error("create failed");
+    expect(created.chapter.title).toBe("");
+    expect(created.chapter.body).toBe("");
   });
 
   test("another writer cannot delete the chapter", async () => {

@@ -62,6 +62,14 @@ export async function logIn(
   return { ok: true, user: toPublic(row) };
 }
 
+export async function setPenName(db: AppDb, userId: number, name: string): Promise<PublicUser> {
+  const row = await db.user.update({
+    where: { id: userId },
+    data: { name: name.trim() },
+  });
+  return toPublic(row);
+}
+
 export async function setAdminByEmail(
   db: AppDb,
   email: string,

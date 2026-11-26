@@ -33,6 +33,10 @@ export function novelInput(overrides: Record<string, string | boolean> = {}) {
     genre: "xianxia",
     titleMy: "",
     descriptionMy: "",
+    sourceTitle: "",
+    sourceContent: "",
+    sourceAuthor: "",
+    originAuthor: "",
     hidden: true,
     ...overrides,
   };

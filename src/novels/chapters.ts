@@ -81,13 +81,11 @@ export async function createChapter(
   novelId: number,
   input: ChapterInput,
 ): Promise<
-  { ok: true; chapter: Chapter } | { ok: false; error: "forbidden" | "missing" | "title" | "body" | "burmeseBody" }
+  { ok: true; chapter: Chapter } | { ok: false; error: "forbidden" | "missing" | "burmeseBody" }
 > {
   const owned = await ownNovel(db, actor, novelId);
   if (!owned.ok) return owned;
   const title = input.title.trim();
-  if (!title) return { ok: false, error: "title" };
-  if (input.body.trim().length === 0) return { ok: false, error: "body" };
   const titleMy = input.titleMy.trim();
   if (input.hidden === false && input.bodyMy.trim().length === 0) return { ok: false, error: "burmeseBody" };
   const highest = await db.chapter.aggregate({ where: { novelId }, _max: { number: true } });
@@ -115,15 +113,13 @@ export async function updateChapter(
   chapterId: number,
   input: ChapterInput,
 ): Promise<
-  { ok: true; chapter: Chapter } | { ok: false; error: "forbidden" | "missing" | "title" | "body" | "burmeseBody" }
+  { ok: true; chapter: Chapter } | { ok: false; error: "forbidden" | "missing" | "burmeseBody" }
 > {
   const current = await getChapterById(db, chapterId);
   if (!current) return { ok: false, error: "missing" };
   const owned = await ownNovel(db, actor, current.novelId);
   if (!owned.ok) return owned;
   const title = input.title.trim();
-  if (!title) return { ok: false, error: "title" };
-  if (input.body.trim().length === 0) return { ok: false, error: "body" };
   const titleMy = input.titleMy.trim();
   if (input.hidden === false && input.bodyMy.trim().length === 0) return { ok: false, error: "burmeseBody" };
   const row = await db.chapter.update({

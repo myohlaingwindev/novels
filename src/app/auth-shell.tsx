@@ -1,10 +1,13 @@
 import type { ReactNode } from "react";
+import Link from "next/link";
 
 export function AuthShell({ children }: { children: ReactNode }) {
   return (
     <div className="auth">
       <section className="auth-aside">
-        <p className="wordmark">Novelle</p>
+        <Link href="/" className="wordmark">
+          Novelle
+        </Link>
         <div>
           <h2>Pick up your story right where you left it.</h2>
           <p className="auth-lede">Your library, bookmarks and reading progress follow you on every device.</p>

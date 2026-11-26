@@ -22,6 +22,10 @@ export default async function NewNovelPage() {
           description=""
           titleMy=""
           descriptionMy=""
+          sourceTitle=""
+          sourceContent=""
+          sourceAuthor=""
+          originAuthor=""
           genre={genre}
           genres={genres}
           hidden

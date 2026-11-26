@@ -38,6 +38,14 @@ describe("novels", () => {
     expect(created.novel.title).toBe("黎明");
   });
 
+  test("stores a novel with a blank English title", async () => {
+    const db = await testDb();
+    const author = await grantedAuthor(db);
+    const created = await createNovel(db, author, novelInput({ title: "   " }));
+    if (!created.ok) throw new Error("create failed");
+    expect(created.novel.title).toBe("");
+  });
+
   test("rejects an empty slug and a slug that is already used", async () => {
     const db = await testDb();
     const author = await grantedAuthor(db);
@@ -105,5 +113,39 @@ describe("novels", () => {
       error: "forbidden",
     });
     expect((await getNovelById(db, created.novel.id))?.description).toBe("");
+  });
+
+  test("stores selectors and the original author", async () => {
+    const db = await testDb();
+    const author = await grantedAuthor(db);
+    const created = await createNovel(
+      db,
+      author,
+      novelInput({
+        sourceTitle: " chapter-title ",
+        sourceContent: "#chapter",
+        sourceAuthor: "author",
+        originAuthor: "  Origin  ",
+      }),
+    );
+    if (!created.ok) throw new Error("create failed");
+    expect(created.novel).toMatchObject({
+      sourceTitle: "chapter-title",
+      sourceContent: "#chapter",
+      sourceAuthor: "author",
+      originAuthor: "Origin",
+    });
+  });
+
+  test("rejects a bad selector and does not change the row", async () => {
+    const db = await testDb();
+    const author = await grantedAuthor(db);
+    const created = await createNovel(db, author, novelInput());
+    if (!created.ok) throw new Error("create failed");
+    expect(await updateNovel(db, author, created.novel.id, novelInput({ sourceTitle: "." }))).toEqual({
+      ok: false,
+      error: "selector",
+    });
+    expect((await getNovelById(db, created.novel.id))?.sourceTitle).toBe("");
   });
 });

@@ -12,6 +12,10 @@ export function NovelForm({
   description,
   titleMy,
   descriptionMy,
+  sourceTitle,
+  sourceContent,
+  sourceAuthor,
+  originAuthor,
   genre,
   genres,
   hidden,
@@ -25,6 +29,10 @@ export function NovelForm({
   description: string;
   titleMy: string;
   descriptionMy: string;
+  sourceTitle: string;
+  sourceContent: string;
+  sourceAuthor: string;
+  originAuthor: string;
   genre: string;
   genres: { slug: string; label: string }[];
   hidden: boolean;
@@ -38,6 +46,10 @@ export function NovelForm({
   const [descriptionValue, setDescriptionValue] = useState(description);
   const [titleMyValue, setTitleMyValue] = useState(titleMy);
   const [descriptionMyValue, setDescriptionMyValue] = useState(descriptionMy);
+  const [sourceTitleValue, setSourceTitleValue] = useState(sourceTitle);
+  const [sourceContentValue, setSourceContentValue] = useState(sourceContent);
+  const [sourceAuthorValue, setSourceAuthorValue] = useState(sourceAuthor);
+  const [originAuthorValue, setOriginAuthorValue] = useState(originAuthor);
   const [genreValue, setGenreValue] = useState(genre);
   const options = genres.some((item) => item.slug === genre) ? genres : [...genres, { slug: genre, label: genre }];
   const [hiddenValue, setHiddenValue] = useState(hidden);
@@ -55,7 +67,6 @@ export function NovelForm({
             value={titleValue}
             onChange={(event) => setTitleValue(event.target.value)}
             placeholder="Enter your novel's title"
-            required
           />
         </div>
         <div className="field">
@@ -141,6 +152,50 @@ export function NovelForm({
             placeholder="What readers see on the novel page"
             rows={5}
           />
+        </div>
+        <div className="split">
+          <div className="field">
+            <label htmlFor="source-title">Title class</label>
+            <input
+              id="source-title"
+              name="sourceTitle"
+              value={sourceTitleValue}
+              onChange={(event) => setSourceTitleValue(event.target.value)}
+              placeholder=".text-2xl or .chapter-body .wtr-line"
+            />
+          </div>
+          <div className="field">
+            <label htmlFor="source-content">Content class</label>
+            <input
+              id="source-content"
+              name="sourceContent"
+              value={sourceContentValue}
+              onChange={(event) => setSourceContentValue(event.target.value)}
+              placeholder=".text-2xl or .chapter-body .wtr-line"
+            />
+          </div>
+        </div>
+        <div className="split">
+          <div className="field">
+            <label htmlFor="source-author">Author class</label>
+            <input
+              id="source-author"
+              name="sourceAuthor"
+              value={sourceAuthorValue}
+              onChange={(event) => setSourceAuthorValue(event.target.value)}
+              placeholder=".text-2xl or .chapter-body .wtr-line"
+            />
+          </div>
+          <div className="field">
+            <label htmlFor="origin-author">Original author</label>
+            <input
+              id="origin-author"
+              name="originAuthor"
+              value={originAuthorValue}
+              onChange={(event) => setOriginAuthorValue(event.target.value)}
+              placeholder="The original author"
+            />
+          </div>
         </div>
         {state?.error ? <p className="error">{state.error}</p> : null}
         <div className="publish-actions">

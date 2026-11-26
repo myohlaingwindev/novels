@@ -3,6 +3,7 @@ import { requireUser } from "@/auth/current";
 import { getDatabase } from "@/db/client";
 import { Cover } from "@/reading/cover-card";
 import { ContinueCard } from "@/reading/continue-card";
+import { CreditLines } from "@/reading/credit-lines";
 import { listFavorites } from "@/reading/favorites";
 import { FavoriteButton } from "../favorite-button";
 
@@ -35,7 +36,10 @@ export default async function FavoritesPage() {
                   </div>
                   <div className="continue-copy">
                     <div className="continue-title">{novel.title}</div>
-                    <div className="continue-meta">{novel.authorName} · Not started</div>
+                    <div className="continue-meta">
+                      <CreditLines originAuthor={novel.originAuthor} penName={novel.authorName} />
+                      <div>Not started</div>
+                    </div>
                   </div>
                   {novel.firstChapterNumber !== null ? (
                     <Link className="btn" href={`/novels/${novel.slug}/chapters/${novel.firstChapterNumber}`}>

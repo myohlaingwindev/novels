@@ -36,6 +36,10 @@ export default async function EditNovelPage({ params }: { params: Promise<{ id: 
           description={novel.description}
           titleMy={novel.titleMy}
           descriptionMy={novel.descriptionMy}
+          sourceTitle={novel.sourceTitle}
+          sourceContent={novel.sourceContent}
+          sourceAuthor={novel.sourceAuthor}
+          originAuthor={novel.originAuthor}
           genre={novel.genre}
           genres={genres}
           hidden={novel.hidden}

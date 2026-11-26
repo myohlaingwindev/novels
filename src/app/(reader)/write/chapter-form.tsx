@@ -2,6 +2,7 @@
 
 import { useActionState, useState } from "react";
 import type { FormState } from "@/auth/actions";
+import { grabChapterAction } from "./actions";
 
 export function ChapterForm({
   action,
@@ -30,11 +31,56 @@ export function ChapterForm({
   const [titleMyValue, setTitleMyValue] = useState(titleMy);
   const [bodyMyValue, setBodyMyValue] = useState(bodyMy);
   const [hiddenValue, setHiddenValue] = useState(hidden);
+  const [url, setUrl] = useState("");
+  const [grabbing, setGrabbing] = useState(false);
+  const [grabError, setGrabError] = useState("");
+  const [grabNotice, setGrabNotice] = useState("");
+  async function grab() {
+    setGrabbing(true);
+    setGrabError("");
+    setGrabNotice("");
+    try {
+      const result = await grabChapterAction(novelId, url);
+      console.log("[grab]", result);
+      if (!result.ok) {
+        setGrabError(result.error);
+        return;
+      }
+      setTitleValue((current) => (current.trim() === "" ? result.title : current));
+      setBodyValue((current) => (current.trim() === "" ? result.body : current));
+      setGrabNotice(result.notices.join(" "));
+    } finally {
+      setGrabbing(false);
+    }
+  }
   return (
     <form action={formAction}>
       <section className="panel">
         <input type="hidden" name="novelId" value={novelId} />
         {chapterId !== undefined ? <input type="hidden" name="chapterId" value={chapterId} /> : null}
+        <div className="field">
+          <label htmlFor="chapter-source-url">Source page</label>
+          <input
+            id="chapter-source-url"
+            type="text"
+            inputMode="url"
+            value={url}
+            onChange={(event) => setUrl(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key !== "Enter") return;
+              event.preventDefault();
+              if (!grabbing) void grab();
+            }}
+            placeholder="https://"
+          />
+          <div className="publish-actions">
+            <button className="btn2" type="button" onClick={grab} disabled={grabbing}>
+              Grab
+            </button>
+          </div>
+          {grabError ? <p className="error">{grabError}</p> : null}
+          {grabNotice ? <span className="hint">{grabNotice}</span> : null}
+        </div>
         <div className="split">
           <div className="field">
             <label htmlFor="chapter-title">Chapter title</label>
@@ -44,7 +90,6 @@ export function ChapterForm({
               value={titleValue}
               onChange={(event) => setTitleValue(event.target.value)}
               placeholder="Enter a chapter title"
-              required
             />
           </div>
           <div className="field">
@@ -66,7 +111,6 @@ export function ChapterForm({
             value={bodyValue}
             onChange={(event) => setBodyValue(event.target.value)}
             placeholder="The English chapter, for your own notes"
-            required
           />
         </div>
         <div className="field">

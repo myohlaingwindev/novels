@@ -19,6 +19,7 @@ const novelSelect = {
   descriptionMy: true,
   genre: true,
   hidden: true,
+  originAuthor: true,
   owner: { select: { name: true, email: true } },
 } as const;
 
@@ -31,6 +32,7 @@ type CatalogNovel = {
   description: string;
   genre: string;
   authorName: string;
+  originAuthor: string;
   ownerId: number;
   chapters: CatalogChapter[];
 };
@@ -62,6 +64,7 @@ async function loadCatalog(db: AppDb): Promise<CatalogNovel[]> {
       description: novel.descriptionMy,
       genre: novel.genre,
       authorName: displayAuthor(novel.owner),
+      originAuthor: novel.originAuthor,
       ownerId: Number(novel.ownerId),
       chapters: chaptersByNovel.get(novel.id) ?? [],
     }));
@@ -91,6 +94,7 @@ export async function listNovelsForLibrary(db: AppDb, readerId: number) {
       continuePosition: index < 0 ? null : index + 1,
       progressUpdatedAt: index < 0 ? null : Number(savedRow?.updatedAt),
       authorName: novel.authorName,
+      originAuthor: novel.originAuthor,
       ownerId: novel.ownerId,
     };
   });
@@ -113,6 +117,7 @@ export async function getNovelDetail(db: AppDb, slug: string, readerId: number) 
       genre: novel.genre,
       slug: novel.slug,
       authorName: novel.authorName,
+      originAuthor: novel.originAuthor,
       ownerId: novel.ownerId,
     },
     chapters: novel.chapters.map((chapter) => ({
