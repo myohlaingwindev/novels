@@ -11,6 +11,7 @@
     "postinstall": "prisma generate"
   },
   "dependencies": {
+    "@noble/hashes": "^2.4.0",
     "@opennextjs/cloudflare": "^1.20.19",
     "@prisma/adapter-better-sqlite3": "^7.10.1",
     "@prisma/adapter-d1": "^7.10.1",

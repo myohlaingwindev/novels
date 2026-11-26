@@ -52,7 +52,7 @@ function burmeseBody(titleMy: string, chapterTitle: string, number: number) {
 async function main() {
   const db = await openScriptDatabase();
   await ensureDefaultGenres(db);
-  const passwordHash = hashPassword(password);
+  const passwordHash = await hashPassword(password);
   const now = Date.now();
   const users = new Map<string, { id: bigint }>();
   for (const author of authors) {

@@ -37,7 +37,7 @@ export async function signUp(
   const row = await db.user.create({
     data: {
       email,
-      passwordHash: hashPassword(input.password),
+      passwordHash: await hashPassword(input.password),
       role: "user",
       createdAt: Date.now(),
     },
@@ -53,8 +53,11 @@ export async function logIn(
   const normalized = normalizeEmail(email);
   if (!normalized) return { ok: false, error: LOGIN_ERROR };
   const row = await db.user.findUnique({ where: { email: normalized } });
-  if (!row || !verifyPassword(password, row.passwordHash)) {
+  if (!row || !(await verifyPassword(password, row.passwordHash))) {
     return { ok: false, error: LOGIN_ERROR };
+  }
+  if (!row.passwordHash.startsWith("pbkdf2:")) {
+    await db.user.update({ where: { id: row.id }, data: { passwordHash: await hashPassword(password) } });
   }
   return { ok: true, user: toPublic(row) };
 }

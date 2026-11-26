@@ -48,4 +48,23 @@ describe("logIn", () => {
     const result = await logIn(db, "Reader@Example.com", "password1");
     expect(result.ok).toBe(true);
   });
+
+  test("replaces an old scrypt hash after a successful login", async () => {
+    const db = await testDb();
+    const { scryptSync } = await import("node:crypto");
+    const salt = "cd".repeat(16);
+    const hash = scryptSync("password1", salt, 64).toString("hex");
+    await db.user.create({
+      data: {
+        email: "reader@example.com",
+        passwordHash: `${salt}:${hash}`,
+        role: "user",
+        createdAt: 1,
+      },
+    });
+    const result = await logIn(db, "reader@example.com", "password1");
+    expect(result.ok).toBe(true);
+    const saved = await db.user.findUnique({ where: { email: "reader@example.com" } });
+    expect(saved?.passwordHash.startsWith("pbkdf2:")).toBe(true);
+  });
 });
