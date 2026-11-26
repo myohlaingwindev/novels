@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { forbidden, notFound } from "next/navigation";
 import { requireUser } from "@/auth/current";
 import { getDatabase } from "@/db/client";
@@ -13,8 +14,13 @@ export default async function NewChapterPage({ params }: { params: Promise<{ id:
   if (!novel) notFound();
   if (novel.ownerId !== user.id) forbidden();
   return (
-    <main>
-      <h1>New chapter</h1>
+    <main className="studio">
+      <div className="studio-head">
+        <h1>New chapter</h1>
+        <p>
+          <Link href={`/write/${novel.id}`}>{novel.title}</Link>
+        </p>
+      </div>
       <ChapterForm
         action={createChapterAction}
         novelId={novel.id}

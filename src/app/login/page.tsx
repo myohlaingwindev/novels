@@ -1,17 +1,21 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { currentUser } from "@/auth/current";
+import { AuthShell } from "../auth-shell";
 import { LoginForm } from "./login-form";
 
 export default async function LoginPage() {
   if (await currentUser()) redirect("/");
   return (
-    <main>
-      <h1>Log in</h1>
+    <AuthShell>
+      <div>
+        <h1>Welcome back</h1>
+        <p className="lede">Sign in to continue reading.</p>
+      </div>
       <LoginForm />
-      <p>
-        <Link href="/signup">Sign up</Link>
+      <p className="auth-switch">
+        New to Novelle? <Link href="/signup">Create an account</Link>
       </p>
-    </main>
+    </AuthShell>
   );
 }

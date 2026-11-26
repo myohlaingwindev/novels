@@ -21,20 +21,24 @@ export default async function ChapterPage({
   const opened = await openChapter(getDatabase(), user.id, slug, parsed);
   if (!opened.ok) notFound();
   return (
-    <ReaderChrome>
-      <main>
-        <p>
-          <Link href={`/novels/${opened.novel.slug}`}>{opened.novel.title}</Link>
-        </p>
-        <ChapterView
-          title={opened.chapter.title}
-          body={opened.chapter.body}
-          className={myanmar.className}
-          novelSlug={opened.novel.slug}
-          prevNumber={opened.prevNumber}
-          nextNumber={opened.nextNumber}
-        />
-      </main>
+    <ReaderChrome
+      novelTitle={opened.novel.title}
+      novelSlug={opened.novel.slug}
+      chapterPosition={opened.chapterPosition}
+      chapterCount={opened.chapterCount}
+    >
+      <ChapterView
+        title={opened.chapter.title}
+        body={opened.chapter.body}
+        className={myanmar.className}
+        novelSlug={opened.novel.slug}
+        prevNumber={opened.prevNumber}
+        nextNumber={opened.nextNumber}
+      />
+      <p className="chapter-foot">
+        Chapter {opened.chapterPosition} of {opened.chapterCount} ·{" "}
+        <Link href={`/novels/${opened.novel.slug}`}>Back to novel page</Link>
+      </p>
     </ReaderChrome>
   );
 }

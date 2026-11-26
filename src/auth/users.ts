@@ -6,16 +6,18 @@ import { normalizeEmail } from "@/auth/validators";
 export type PublicUser = {
   id: number;
   email: string;
+  name: string;
   role: Role;
   createdAt: number;
 };
 
 const LOGIN_ERROR = "Email or password is incorrect.";
 
-function toPublic(row: { id: bigint; email: string; role: string; createdAt: bigint }): PublicUser {
+function toPublic(row: { id: bigint; email: string; name: string; role: string; createdAt: bigint }): PublicUser {
   return {
     id: Number(row.id),
     email: row.email,
+    name: row.name,
     role: row.role as Role,
     createdAt: Number(row.createdAt),
   };

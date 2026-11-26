@@ -38,9 +38,25 @@ export function ChapterView({
 }) {
   return (
     <>
-      {prevNumber !== null ? <a href={`/novels/${novelSlug}/chapters/${prevNumber}`}>Previous</a> : null}
       <ChapterArticle title={title} body={body} className={className} />
-      {nextNumber !== null ? <a href={`/novels/${novelSlug}/chapters/${nextNumber}`}>Next</a> : null}
+      <nav className="chapter-nav" aria-label="Chapter navigation">
+        {prevNumber !== null ? (
+          <a className="btn2" href={`/novels/${novelSlug}/chapters/${prevNumber}`}>
+            <span className="label-long">← Previous chapter</span>
+            <span className="label-short">← Previous</span>
+          </a>
+        ) : (
+          <span />
+        )}
+        {nextNumber !== null ? (
+          <a className="btn" href={`/novels/${novelSlug}/chapters/${nextNumber}`}>
+            <span className="label-long">Next chapter →</span>
+            <span className="label-short">Next →</span>
+          </a>
+        ) : (
+          <span />
+        )}
+      </nav>
     </>
   );
 }

@@ -29,6 +29,7 @@ export async function getUserBySession(db: AppDb, sessionId: string, now = Date.
   return {
     id: Number(user.id),
     email: user.email,
+    name: user.name,
     role: user.role as Role,
     createdAt: Number(user.createdAt),
   };

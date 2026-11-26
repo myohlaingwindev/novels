@@ -6,8 +6,9 @@ import type { FormState } from "@/auth/actions";
 import { requireUser } from "@/auth/current";
 import { getDatabase } from "@/db/client";
 import { createChapter, deleteChapter, updateChapter } from "@/novels/chapters";
+import { addGenre, deleteGenre, updateGenre } from "@/novels/genre";
 import { addGlossaryTerm, deleteGlossaryTerm } from "@/novels/glossary";
-import { chapterWriteError, glossaryWriteError, novelWriteError } from "@/novels/messages";
+import { chapterWriteError, genreWriteError, glossaryWriteError, novelWriteError } from "@/novels/messages";
 import { createNovel, deleteNovel, updateNovel } from "@/novels/novels";
 
 function hiddenFromForm(formData: FormData) {
@@ -108,6 +109,43 @@ export async function deleteChapterAction(formData: FormData): Promise<void> {
   if (!result.ok && result.error === "forbidden") forbidden();
   if (!result.ok) notFound();
   redirect(`/write/${novelId}`);
+}
+
+export async function addGenreAction(_state: FormState, formData: FormData): Promise<FormState> {
+  const user = await requireUser();
+  if (!canWrite(user.role)) forbidden();
+  const result = await addGenre(getDatabase(), user, {
+    label: String(formData.get("label") ?? ""),
+    labelMy: String(formData.get("labelMy") ?? ""),
+  });
+  if (!result.ok && (result.error === "label" || result.error === "duplicate")) {
+    return { error: genreWriteError(result.error) };
+  }
+  if (!result.ok) forbidden();
+  redirect("/write");
+}
+
+export async function updateGenreAction(_state: FormState, formData: FormData): Promise<FormState> {
+  const user = await requireUser();
+  if (!canWrite(user.role)) forbidden();
+  const result = await updateGenre(getDatabase(), user, Number(formData.get("id")), {
+    label: String(formData.get("label") ?? ""),
+    labelMy: String(formData.get("labelMy") ?? ""),
+  });
+  if (!result.ok && result.error === "label") return { error: genreWriteError("label") };
+  if (!result.ok && result.error === "forbidden") forbidden();
+  if (!result.ok) notFound();
+  redirect("/write");
+}
+
+export async function deleteGenreAction(_state: FormState, formData: FormData): Promise<FormState> {
+  const user = await requireUser();
+  if (!canWrite(user.role)) forbidden();
+  const result = await deleteGenre(getDatabase(), user, Number(formData.get("id")));
+  if (!result.ok && result.error === "used") return { error: genreWriteError("used") };
+  if (!result.ok && result.error === "forbidden") forbidden();
+  if (!result.ok) notFound();
+  redirect("/write");
 }
 
 export async function addGlossaryAction(_state: FormState, formData: FormData): Promise<FormState> {

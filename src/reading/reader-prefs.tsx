@@ -5,6 +5,8 @@ import { useEffect, useState, type ReactNode } from "react";
 type FontSize = "small" | "default" | "large";
 type Theme = "light" | "sepia" | "dark";
 
+const fontSizes: FontSize[] = ["small", "default", "large"];
+
 export function readReaderPrefs(read: (key: string) => string | null): {
   fontSize: FontSize;
   theme: Theme;
@@ -17,9 +19,30 @@ export function readReaderPrefs(read: (key: string) => string | null): {
   };
 }
 
-export function ReaderChrome({ children }: { children: ReactNode }) {
+export function stepFontSize(current: FontSize, direction: -1 | 1): FontSize {
+  const index = fontSizes.indexOf(current);
+  const next = index + direction;
+  if (next < 0 || next >= fontSizes.length) return current;
+  return fontSizes[next];
+}
+
+export function ReaderChrome({
+  children,
+  novelTitle,
+  novelSlug,
+  chapterPosition,
+  chapterCount,
+}: {
+  children: ReactNode;
+  novelTitle: string;
+  novelSlug: string;
+  chapterPosition: number;
+  chapterCount: number;
+}) {
   const [fontSize, setFontSize] = useState<FontSize>("default");
   const [theme, setTheme] = useState<Theme>("light");
+  const [toolsOpen, setToolsOpen] = useState(false);
+  const percent = chapterCount > 0 ? Math.round((chapterPosition / chapterCount) * 100) : 0;
 
   useEffect(() => {
     const prefs = readReaderPrefs((key) => localStorage.getItem(key));
@@ -27,41 +50,99 @@ export function ReaderChrome({ children }: { children: ReactNode }) {
     setTheme(prefs.theme);
   }, []);
 
+  function storeFont(direction: -1 | 1) {
+    const next = stepFontSize(fontSize, direction);
+    localStorage.setItem("novels-font-size", next);
+    setFontSize(next);
+  }
+
+  function storeTheme(next: Theme) {
+    localStorage.setItem("novels-theme", next);
+    setTheme(next);
+  }
+
+  const tools = (
+    <>
+      <div className="reader-sizes" role="group" aria-label="Text size">
+        <button type="button" className="icon-button" aria-label="Smaller text" onClick={() => storeFont(-1)}>
+          A−
+        </button>
+        <button type="button" className="icon-button" aria-label="Larger text" onClick={() => storeFont(1)}>
+          A+
+        </button>
+      </div>
+      <div className="reader-swatches" role="group" aria-label="Page theme">
+        <button
+          type="button"
+          className="swatch"
+          aria-label="Light theme"
+          aria-pressed={theme === "light"}
+          style={{ background: "#FBF8F3" }}
+          onClick={() => storeTheme("light")}
+        />
+        <button
+          type="button"
+          className="swatch"
+          aria-label="Sepia theme"
+          aria-pressed={theme === "sepia"}
+          style={{ background: "#EBDDC3" }}
+          onClick={() => storeTheme("sepia")}
+        />
+        <button
+          type="button"
+          className="swatch"
+          aria-label="Dark theme"
+          aria-pressed={theme === "dark"}
+          style={{ background: "#1F1B16" }}
+          onClick={() => storeTheme("dark")}
+        />
+      </div>
+    </>
+  );
+
   return (
     <div className="reader" data-font={fontSize} data-theme={theme}>
-      <div className="reader-controls">
-        <label htmlFor="reader-font-size">Font size</label>
-        <select
-          id="reader-font-size"
-          value={fontSize}
-          onChange={(event) => {
-            const value = event.target.value;
-            if (value !== "small" && value !== "default" && value !== "large") return;
-            localStorage.setItem("novels-font-size", value);
-            setFontSize(value);
-          }}
+      <header className="reader-bar">
+        <div className="reader-bar-row">
+          <a className="reader-back" href={`/novels/${novelSlug}`}>
+            <span aria-hidden="true">←</span>
+            <span className="reader-back-title">{novelTitle}</span>
+          </a>
+          <div className="reader-position">
+            Chapter {chapterPosition} of {chapterCount}
+          </div>
+          <div className="reader-desktop-tools">{tools}</div>
+          <div className="reader-mobile-tools">
+            <button
+              type="button"
+              className="icon-button"
+              aria-label="Text and theme settings"
+              aria-expanded={toolsOpen}
+              onClick={() => setToolsOpen((open) => !open)}
+            >
+              Aa
+            </button>
+          </div>
+          <a className="icon-button" href={`/novels/${novelSlug}`} aria-label="Chapter list">
+            ≡
+          </a>
+        </div>
+        {toolsOpen ? <div className="reader-tool-panel">{tools}</div> : null}
+        <div
+          className="reader-progress"
+          role="progressbar"
+          aria-valuenow={percent}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-label="Book progress"
         >
-          <option value="small">small</option>
-          <option value="default">default</option>
-          <option value="large">large</option>
-        </select>
-        <label htmlFor="reader-theme">Theme</label>
-        <select
-          id="reader-theme"
-          value={theme}
-          onChange={(event) => {
-            const value = event.target.value;
-            if (value !== "light" && value !== "sepia" && value !== "dark") return;
-            localStorage.setItem("novels-theme", value);
-            setTheme(value);
-          }}
-        >
-          <option value="light">light</option>
-          <option value="sepia">sepia</option>
-          <option value="dark">dark</option>
-        </select>
+          <div style={{ width: `${percent}%` }} />
+        </div>
+      </header>
+      <div className="reader-column">
+        <div className="chapter-kicker">Chapter {chapterPosition}</div>
+        {children}
       </div>
-      {children}
     </div>
   );
 }

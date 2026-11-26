@@ -10,27 +10,44 @@ export function GlossaryForm({ novelId }: { novelId: number }) {
   const [burmeseValue, setBurmeseValue] = useState("");
   const [noteValue, setNoteValue] = useState("");
   return (
-    <form action={formAction}>
+    <form className="glossary-form" action={formAction}>
       <input type="hidden" name="novelId" value={novelId} />
-      <label>
-        Source{" "}
-        <input name="source" value={sourceValue} onChange={(event) => setSourceValue(event.target.value)} required />
-      </label>
-      <label>
-        Burmese{" "}
+      <div className="field">
+        <label htmlFor="glossary-source">Source</label>
         <input
+          id="glossary-source"
+          name="source"
+          value={sourceValue}
+          onChange={(event) => setSourceValue(event.target.value)}
+          placeholder="sect"
+          required
+        />
+      </div>
+      <div className="field">
+        <label htmlFor="glossary-burmese">Burmese</label>
+        <input
+          id="glossary-burmese"
           name="burmese"
           value={burmeseValue}
           onChange={(event) => setBurmeseValue(event.target.value)}
+          placeholder="ဂိုဏ်း"
           required
         />
-      </label>
-      <label>
-        Note{" "}
-        <input name="note" value={noteValue} onChange={(event) => setNoteValue(event.target.value)} />
-      </label>
+      </div>
+      <div className="field">
+        <label htmlFor="glossary-note">Note</label>
+        <input
+          id="glossary-note"
+          name="note"
+          value={noteValue}
+          onChange={(event) => setNoteValue(event.target.value)}
+          placeholder="Optional"
+        />
+      </div>
       {state?.error ? <p className="error">{state.error}</p> : null}
-      <button type="submit">Add term</button>
+      <button className="btn" type="submit">
+        Add term
+      </button>
     </form>
   );
 }

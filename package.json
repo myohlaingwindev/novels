@@ -7,6 +7,7 @@
     "start": "next start",
     "test": "vitest run",
     "admin": "node --env-file=.env --import tsx scripts/admin.ts",
+    "seed": "node --env-file=.env --import tsx scripts/seed.ts",
     "postinstall": "prisma generate"
   },
   "dependencies": {

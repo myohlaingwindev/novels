@@ -1,7 +1,8 @@
 import type { AppDb } from "@/db/client";
+import { forget, libraryCatalogKey } from "@/db/memory-cache";
 import type { Role } from "@/auth/access";
 import { canWrite } from "@/auth/access";
-import { isGenre, type Genre } from "@/novels/genre";
+import { genreExists } from "@/novels/genre";
 import { normalizeSlug } from "@/novels/slug";
 
 export type NovelInput = {
@@ -21,7 +22,7 @@ export type Novel = {
   description: string;
   titleMy: string;
   descriptionMy: string;
-  genre: Genre;
+  genre: string;
   hidden: boolean;
   slug: string;
   createdAt: number;
@@ -43,7 +44,6 @@ function toNovel(row: {
   createdAt: bigint;
   updatedAt: bigint;
 }): Novel {
-  if (!isGenre(row.genre)) throw new Error("invalid genre");
   return {
     id: Number(row.id),
     ownerId: Number(row.ownerId),
@@ -82,7 +82,7 @@ export async function createNovel(
   if (!canWrite(actor.role)) return { ok: false, error: "forbidden" };
   const title = input.title.trim();
   if (!title) return { ok: false, error: "title" };
-  if (!isGenre(input.genre)) return { ok: false, error: "genre" };
+  if (!(await genreExists(db, input.genre))) return { ok: false, error: "genre" };
   const titleMy = input.titleMy.trim();
   if (!input.hidden && !titleMy) return { ok: false, error: "burmeseTitle" };
   const slug = normalizeSlug(input.slug);
@@ -103,6 +103,7 @@ export async function createNovel(
       updatedAt: now,
     },
   });
+  forget(libraryCatalogKey);
   return { ok: true, novel: toNovel(row) };
 }
 
@@ -120,7 +121,7 @@ export async function updateNovel(
   if (Number(current.ownerId) !== actor.id) return { ok: false, error: "forbidden" };
   const title = input.title.trim();
   if (!title) return { ok: false, error: "title" };
-  if (!isGenre(input.genre)) return { ok: false, error: "genre" };
+  if (!(await genreExists(db, input.genre))) return { ok: false, error: "genre" };
   const titleMy = input.titleMy.trim();
   if (!input.hidden && !titleMy) return { ok: false, error: "burmeseTitle" };
   const row = await db.novel.update({
@@ -135,6 +136,7 @@ export async function updateNovel(
       updatedAt: Date.now(),
     },
   });
+  forget(libraryCatalogKey);
   return { ok: true, novel: toNovel(row) };
 }
 
@@ -148,5 +150,6 @@ export async function deleteNovel(
   if (!current) return { ok: false, error: "missing" };
   if (Number(current.ownerId) !== actor.id) return { ok: false, error: "forbidden" };
   await db.novel.delete({ where: { id: novelId } });
+  forget(libraryCatalogKey);
   return { ok: true };
 }

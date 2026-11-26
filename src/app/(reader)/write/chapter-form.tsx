@@ -32,54 +32,74 @@ export function ChapterForm({
   const [hiddenValue, setHiddenValue] = useState(hidden);
   return (
     <form action={formAction}>
-      <input type="hidden" name="novelId" value={novelId} />
-      {chapterId !== undefined ? <input type="hidden" name="chapterId" value={chapterId} /> : null}
-      <label>
-        Title{" "}
-        <input
-          name="title"
-          value={titleValue}
-          onChange={(event) => setTitleValue(event.target.value)}
-          required
-        />
-      </label>
-      <label>
-        Chapter text{" "}
-        <textarea
-          name="body"
-          value={bodyValue}
-          onChange={(event) => setBodyValue(event.target.value)}
-          required
-        />
-      </label>
-      <label>
-        Burmese title{" "}
-        <input
-          name="titleMy"
-          value={titleMyValue}
-          onChange={(event) => setTitleMyValue(event.target.value)}
-        />
-      </label>
-      <label>
-        Burmese chapter text{" "}
-        <textarea
-          name="bodyMy"
-          value={bodyMyValue}
-          onChange={(event) => setBodyMyValue(event.target.value)}
-        />
-      </label>
-      <label>
-        Hidden from library{" "}
-        <input
-          type="checkbox"
-          name="hidden"
-          value="true"
-          checked={hiddenValue}
-          onChange={(event) => setHiddenValue(event.target.checked)}
-        />
-      </label>
-      {state?.error ? <p className="error">{state.error}</p> : null}
-      <button type="submit">{submitLabel}</button>
+      <section className="panel">
+        <input type="hidden" name="novelId" value={novelId} />
+        {chapterId !== undefined ? <input type="hidden" name="chapterId" value={chapterId} /> : null}
+        <div className="split">
+          <div className="field">
+            <label htmlFor="chapter-title">Chapter title</label>
+            <input
+              id="chapter-title"
+              name="title"
+              value={titleValue}
+              onChange={(event) => setTitleValue(event.target.value)}
+              placeholder="Enter a chapter title"
+              required
+            />
+          </div>
+          <div className="field">
+            <label htmlFor="chapter-title-my">Burmese title</label>
+            <input
+              id="chapter-title-my"
+              name="titleMy"
+              value={titleMyValue}
+              onChange={(event) => setTitleMyValue(event.target.value)}
+              placeholder="The title readers see"
+            />
+          </div>
+        </div>
+        <div className="field">
+          <label htmlFor="chapter-body">Chapter text</label>
+          <textarea
+            id="chapter-body"
+            name="body"
+            value={bodyValue}
+            onChange={(event) => setBodyValue(event.target.value)}
+            placeholder="The English chapter, for your own notes"
+            required
+          />
+        </div>
+        <div className="field">
+          <label htmlFor="chapter-body-my">Burmese chapter text</label>
+          <textarea
+            id="chapter-body-my"
+            name="bodyMy"
+            value={bodyMyValue}
+            onChange={(event) => setBodyMyValue(event.target.value)}
+            placeholder="The chapter readers see"
+          />
+          <span className="hint">{bodyMyValue.trim() ? `${bodyMyValue.trim().split(/\s+/).length} words` : "0 words"}</span>
+        </div>
+        <fieldset className="field">
+          <legend>Library</legend>
+          <div className="choices">
+            <label>
+              <input type="radio" name="hidden" value="true" checked={hiddenValue} onChange={() => setHiddenValue(true)} />
+              Draft
+            </label>
+            <label>
+              <input type="radio" name="hidden" value="false" checked={!hiddenValue} onChange={() => setHiddenValue(false)} />
+              In the library
+            </label>
+          </div>
+        </fieldset>
+        {state?.error ? <p className="error">{state.error}</p> : null}
+        <div className="publish-actions">
+          <button className="btn" type="submit">
+            {submitLabel}
+          </button>
+        </div>
+      </section>
     </form>
   );
 }

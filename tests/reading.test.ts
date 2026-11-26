@@ -138,6 +138,20 @@ describe("reading", () => {
       expect(await db.progress.findMany({ where: { userId: readerId } })).toEqual([]);
     });
 
+    test("continue position counts only visible chapters", async () => {
+      await createChapter(db, actor, novelId, chapterInput({ hidden: false, bodyMy: "တစ်" }));
+      await createChapter(db, actor, novelId, chapterInput({ hidden: true, bodyMy: "နှစ်" }));
+      await createChapter(db, actor, novelId, chapterInput({ hidden: false, bodyMy: "သုံး" }));
+      await openChapter(db, readerId, "dawn", 3);
+      const library = await listNovelsForLibrary(db, readerId);
+      expect(library[0]).toMatchObject({
+        continueNumber: 3,
+        continuePosition: 2,
+        chapterCount: 2,
+      });
+      expect(library[0]?.progressUpdatedAt).toEqual(expect.any(Number));
+    });
+
     test("previous and next skip a hidden chapter", async () => {
       await createChapter(db, actor, novelId, chapterInput({ hidden: false, bodyMy: "တစ်", title: "A" }));
       await createChapter(db, actor, novelId, chapterInput({ hidden: true, bodyMy: "နှစ်", title: "B" }));
@@ -155,6 +169,8 @@ describe("reading", () => {
       await updateChapter(db, actor, chapter.chapter.id, chapterInput({ hidden: true, bodyMy: "မြန်မာ" }));
       const library = await listNovelsForLibrary(db, readerId);
       expect(library[0]?.continueNumber).toBeNull();
+      expect(library[0]?.continuePosition).toBeNull();
+      expect(library[0]?.progressUpdatedAt).toBeNull();
       expect(await db.progress.findMany({ where: { chapterId: chapter.chapter.id } })).toHaveLength(1);
     });
 

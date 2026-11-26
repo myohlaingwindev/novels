@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { chapterWriteError, glossaryWriteError, novelWriteError } from "@/novels/messages";
+import { chapterWriteError, genreWriteError, glossaryWriteError, novelWriteError } from "@/novels/messages";
 
 describe("write errors", () => {
   test("uses the form messages", () => {
@@ -11,6 +11,9 @@ describe("write errors", () => {
     expect(chapterWriteError("title")).toBe("Title is required.");
     expect(chapterWriteError("body")).toBe("Chapter text is required.");
     expect(chapterWriteError("burmeseBody")).toBe("A Burmese chapter is required before this chapter can be shown.");
+    expect(genreWriteError("label")).toBe("Enter a label and a Burmese form.");
+    expect(genreWriteError("duplicate")).toBe("That genre already exists.");
+    expect(genreWriteError("used")).toBe("That genre is used by a novel.");
     expect(glossaryWriteError("term")).toBe("Enter a source term and a Burmese form.");
     expect(glossaryWriteError("duplicate")).toBe("That term is already in this glossary.");
   });

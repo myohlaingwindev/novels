@@ -1,4 +1,5 @@
 import type { AppDb } from "@/db/client";
+import { forget, libraryCatalogKey } from "@/db/memory-cache";
 import type { Role } from "@/auth/access";
 import { canWrite } from "@/auth/access";
 
@@ -104,6 +105,7 @@ export async function createChapter(
       updatedAt: now,
     },
   });
+  forget(libraryCatalogKey);
   return { ok: true, chapter: toChapter(row) };
 }
 
@@ -128,6 +130,7 @@ export async function updateChapter(
     where: { id: chapterId },
     data: { title, body: input.body, titleMy, bodyMy: input.bodyMy, hidden: input.hidden, updatedAt: Date.now() },
   });
+  forget(libraryCatalogKey);
   return { ok: true, chapter: toChapter(row) };
 }
 
@@ -141,5 +144,6 @@ export async function deleteChapter(
   const owned = await ownNovel(db, actor, current.novelId);
   if (!owned.ok) return owned;
   await db.chapter.delete({ where: { id: chapterId } });
+  forget(libraryCatalogKey);
   return { ok: true };
 }

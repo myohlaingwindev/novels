@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { forbidden, notFound } from "next/navigation";
 import { requireUser } from "@/auth/current";
 import { getDatabase } from "@/db/client";
@@ -21,8 +22,13 @@ export default async function EditChapterPage({
   if (!novel || !chapter || chapter.novelId !== novel.id) notFound();
   if (novel.ownerId !== user.id) forbidden();
   return (
-    <main>
-      <h1>Edit chapter {chapter.number}</h1>
+    <main className="studio">
+      <div className="studio-head">
+        <h1>Edit chapter {chapter.number}</h1>
+        <p>
+          <Link href={`/write/${novel.id}`}>{novel.title}</Link>
+        </p>
+      </div>
       <ChapterForm
         action={updateChapterAction}
         novelId={novel.id}
@@ -37,7 +43,9 @@ export default async function EditChapterPage({
       <form action={deleteChapterAction}>
         <input type="hidden" name="novelId" value={novel.id} />
         <input type="hidden" name="chapterId" value={chapter.id} />
-        <button type="submit">Delete chapter</button>
+        <button className="btn2" type="submit">
+          Delete chapter
+        </button>
       </form>
     </main>
   );

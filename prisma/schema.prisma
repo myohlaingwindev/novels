@@ -10,11 +10,13 @@ datasource db {
 model User {
   id           BigInt     @id @default(autoincrement())
   email        String     @unique
+  name         String     @default("")
   passwordHash String     @map("password_hash")
   role         String
   createdAt    BigInt     @map("created_at")
   novels       Novel[]
   progress     Progress[]
+  favorites    Favorite[]
   sessions     Session[]
 
   @@map("users")
@@ -35,6 +37,7 @@ model Novel {
   owner         User           @relation(fields: [ownerId], references: [id])
   chapters      Chapter[]
   progress      Progress[]
+  favorites     Favorite[]
   glossary      GlossaryTerm[]
 
   @@map("novels")
@@ -58,6 +61,15 @@ model Chapter {
   @@map("chapters")
 }
 
+model Genre {
+  id      BigInt @id @default(autoincrement())
+  slug    String @unique
+  label   String
+  labelMy String @default("") @map("label_my")
+
+  @@map("genres")
+}
+
 model GlossaryTerm {
   id      BigInt @id @default(autoincrement())
   novelId BigInt @map("novel_id")
@@ -68,6 +80,17 @@ model GlossaryTerm {
 
   @@unique([novelId, source])
   @@map("glossary_terms")
+}
+
+model Favorite {
+  userId    BigInt @map("user_id")
+  novelId   BigInt @map("novel_id")
+  createdAt BigInt @map("created_at")
+  user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  novel     Novel  @relation(fields: [novelId], references: [id], onDelete: Cascade)
+
+  @@id([userId, novelId])
+  @@map("favorites")
 }
 
 model Progress {
