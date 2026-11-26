@@ -35,7 +35,7 @@ describe("admin promotion", () => {
 
   test("the command prints the sign-up message for an unknown email", () => {
     expect(() =>
-      execFileSync("node", ["--env-file=.env", "--import", "tsx", "scripts/admin.ts", "missing@example.com"], {
+      execFileSync("node", ["--import", "tsx", "scripts/admin.ts", "missing@example.com"], {
         env: { ...process.env, DATABASE_URL: testDatabaseUrl },
         encoding: "utf8",
       }),

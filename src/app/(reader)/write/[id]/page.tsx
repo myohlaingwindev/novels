@@ -15,10 +15,10 @@ export default async function EditNovelPage({ params }: { params: Promise<{ id: 
   const user = await requireUser();
   const novelId = Number((await params).id);
   if (!Number.isInteger(novelId)) notFound();
-  const novel = await getNovelById(getDatabase(), novelId);
+  const novel = await getNovelById(await getDatabase(), novelId);
   if (!novel) notFound();
   if (novel.ownerId !== user.id) forbidden();
-  const db = getDatabase();
+  const db = await getDatabase();
   const chapters = await listChapters(db, novel.id);
   const terms = await listGlossary(db, novel.id);
   const genres = await listGenres(db);

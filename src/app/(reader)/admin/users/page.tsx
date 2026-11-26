@@ -23,7 +23,8 @@ function joinedLabel(createdAt: bigint) {
 export default async function UsersPage() {
   const user = await requireUser();
   if (user.role !== "admin") forbidden();
-  const accounts = await getDatabase().user.findMany({
+  const db = await getDatabase();
+  const accounts = await db.user.findMany({
     orderBy: { createdAt: "desc" },
     include: { _count: { select: { novels: true } } },
   });

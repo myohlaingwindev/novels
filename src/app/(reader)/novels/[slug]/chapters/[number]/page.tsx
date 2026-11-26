@@ -18,7 +18,7 @@ export default async function ChapterPage({
   const { slug, number } = await params;
   const parsed = Number(number);
   if (!Number.isInteger(parsed) || parsed < 1) notFound();
-  const opened = await openChapter(getDatabase(), user.id, slug, parsed);
+  const opened = await openChapter(await getDatabase(), user.id, slug, parsed);
   if (!opened.ok) notFound();
   return (
     <ReaderChrome

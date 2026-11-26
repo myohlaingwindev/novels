@@ -1,15 +1,16 @@
+import path from "node:path";
 import type { PrismaClient } from "@/generated/prisma/client";
-import { createDatabase } from "@/db/client";
+import { createFileDatabase } from "@/db/file";
 import { clearMemoryCache } from "@/db/memory-cache";
 import { ensureDefaultGenres } from "@/novels/genre";
 
-export const testDatabaseUrl = "postgresql://novels:novels-local@127.0.0.1:5432/novels";
+export const testDatabaseUrl = `file:${path.resolve("data/test.sqlite")}`;
 
 let client: PrismaClient | undefined;
 
 export async function testDb() {
   if (!client) {
-    client = createDatabase(testDatabaseUrl, "test");
+    client = createFileDatabase(testDatabaseUrl);
   }
   clearMemoryCache();
   await client.glossaryTerm.deleteMany();

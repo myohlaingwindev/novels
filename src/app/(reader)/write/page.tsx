@@ -7,7 +7,7 @@ import { GenreManager } from "./genre-form";
 
 export default async function WriteIndexPage() {
   const user = await requireUser();
-  const db = getDatabase();
+  const db = await getDatabase();
   const novels = await listOwnedNovels(db, user.id);
   const genres = await listGenres(db);
   return (

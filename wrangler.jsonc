@@ -27,11 +27,12 @@
         "enabled": true
       }
     },
-    "hyperdrive": [
+    "d1_databases": [
       {
-        "binding": "MY_NOVELS2",
-        "id": "d96e6c9cb513495aae6ce14e54885fa1",
-        "localConnectionString": "postgresql://neondb_owner:npg_vm3VxUAFK7RL@ep-fancy-morning-bi4fei25-pooler.c-5.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
+        "binding": "DB",
+        "database_name": "novels",
+        "database_id": "cd523502-68b8-499c-a60d-7a940ba3c87e",
+        "remote": true
       }
     ],
     "vars": {

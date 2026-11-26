@@ -21,7 +21,7 @@ export default async function NovelPage({
   const user = await requireUser();
   const { slug } = await params;
   const query = await searchParams;
-  const db = getDatabase();
+  const db = await getDatabase();
   const detail = await getNovelDetail(db, slug, user.id);
   const genreList = await listGenres(db);
   if (!detail.ok) notFound();

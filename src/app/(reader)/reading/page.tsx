@@ -7,7 +7,7 @@ import { listNovelsForLibrary } from "@/reading/reading";
 
 export default async function ContinueReadingPage() {
   const user = await requireUser();
-  const reading = novelsStillReading(await listNovelsForLibrary(getDatabase(), user.id));
+  const reading = novelsStillReading(await listNovelsForLibrary(await getDatabase(), user.id));
 
   return (
     <main className="library">

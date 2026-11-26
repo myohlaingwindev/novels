@@ -10,7 +10,7 @@ export default async function NewChapterPage({ params }: { params: Promise<{ id:
   const user = await requireUser();
   const novelId = Number((await params).id);
   if (!Number.isInteger(novelId)) notFound();
-  const novel = await getNovelById(getDatabase(), novelId);
+  const novel = await getNovelById(await getDatabase(), novelId);
   if (!novel) notFound();
   if (novel.ownerId !== user.id) forbidden();
   return (

@@ -1,4 +1,4 @@
-import { getDatabase } from "@/db/client";
+import { openScriptDatabase } from "@/db/script";
 import { hashPassword } from "@/auth/password";
 import { ensureDefaultGenres } from "@/novels/genre";
 
@@ -50,7 +50,7 @@ function burmeseBody(titleMy: string, chapterTitle: string, number: number) {
 }
 
 async function main() {
-  const db = getDatabase();
+  const db = await openScriptDatabase();
   await ensureDefaultGenres(db);
   const passwordHash = hashPassword(password);
   const now = Date.now();

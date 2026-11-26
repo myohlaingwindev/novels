@@ -17,8 +17,8 @@ export default async function EditChapterPage({
   const novelId = Number(id);
   const parsedChapterId = Number(chapterId);
   if (!Number.isInteger(novelId) || !Number.isInteger(parsedChapterId)) notFound();
-  const novel = await getNovelById(getDatabase(), novelId);
-  const chapter = await getChapterById(getDatabase(), parsedChapterId);
+  const novel = await getNovelById(await getDatabase(), novelId);
+  const chapter = await getChapterById(await getDatabase(), parsedChapterId);
   if (!novel || !chapter || chapter.novelId !== novel.id) notFound();
   if (novel.ownerId !== user.id) forbidden();
   return (

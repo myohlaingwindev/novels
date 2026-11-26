@@ -18,7 +18,7 @@ function hiddenFromForm(formData: FormData) {
 export async function createNovelAction(_state: FormState, formData: FormData): Promise<FormState> {
   const user = await requireUser();
   if (!canWrite(user.role)) forbidden();
-  const result = await createNovel(getDatabase(), user, {
+  const result = await createNovel(await getDatabase(), user, {
     title: String(formData.get("title") ?? ""),
     description: String(formData.get("description") ?? ""),
     slug: String(formData.get("slug") ?? ""),
@@ -39,7 +39,7 @@ export async function createNovelAction(_state: FormState, formData: FormData): 
 export async function updateNovelAction(_state: FormState, formData: FormData): Promise<FormState> {
   const user = await requireUser();
   if (!canWrite(user.role)) forbidden();
-  const result = await updateNovel(getDatabase(), user, Number(formData.get("id")), {
+  const result = await updateNovel(await getDatabase(), user, Number(formData.get("id")), {
     title: String(formData.get("title") ?? ""),
     description: String(formData.get("description") ?? ""),
     genre: String(formData.get("genre") ?? ""),
@@ -58,7 +58,7 @@ export async function updateNovelAction(_state: FormState, formData: FormData): 
 export async function deleteNovelAction(formData: FormData): Promise<void> {
   const user = await requireUser();
   if (!canWrite(user.role)) forbidden();
-  const result = await deleteNovel(getDatabase(), user, Number(formData.get("id")));
+  const result = await deleteNovel(await getDatabase(), user, Number(formData.get("id")));
   if (!result.ok && result.error === "forbidden") forbidden();
   if (!result.ok) notFound();
   redirect("/write");
@@ -68,7 +68,7 @@ export async function createChapterAction(_state: FormState, formData: FormData)
   const user = await requireUser();
   if (!canWrite(user.role)) forbidden();
   const novelId = Number(formData.get("novelId"));
-  const result = await createChapter(getDatabase(), user, novelId, {
+  const result = await createChapter(await getDatabase(), user, novelId, {
     title: String(formData.get("title") ?? ""),
     body: String(formData.get("body") ?? ""),
     titleMy: String(formData.get("titleMy") ?? ""),
@@ -86,7 +86,7 @@ export async function createChapterAction(_state: FormState, formData: FormData)
 export async function updateChapterAction(_state: FormState, formData: FormData): Promise<FormState> {
   const user = await requireUser();
   if (!canWrite(user.role)) forbidden();
-  const result = await updateChapter(getDatabase(), user, Number(formData.get("chapterId")), {
+  const result = await updateChapter(await getDatabase(), user, Number(formData.get("chapterId")), {
     title: String(formData.get("title") ?? ""),
     body: String(formData.get("body") ?? ""),
     titleMy: String(formData.get("titleMy") ?? ""),
@@ -105,7 +105,7 @@ export async function deleteChapterAction(formData: FormData): Promise<void> {
   const user = await requireUser();
   if (!canWrite(user.role)) forbidden();
   const novelId = Number(formData.get("novelId"));
-  const result = await deleteChapter(getDatabase(), user, Number(formData.get("chapterId")));
+  const result = await deleteChapter(await getDatabase(), user, Number(formData.get("chapterId")));
   if (!result.ok && result.error === "forbidden") forbidden();
   if (!result.ok) notFound();
   redirect(`/write/${novelId}`);
@@ -114,7 +114,7 @@ export async function deleteChapterAction(formData: FormData): Promise<void> {
 export async function addGenreAction(_state: FormState, formData: FormData): Promise<FormState> {
   const user = await requireUser();
   if (!canWrite(user.role)) forbidden();
-  const result = await addGenre(getDatabase(), user, {
+  const result = await addGenre(await getDatabase(), user, {
     label: String(formData.get("label") ?? ""),
     labelMy: String(formData.get("labelMy") ?? ""),
   });
@@ -128,7 +128,7 @@ export async function addGenreAction(_state: FormState, formData: FormData): Pro
 export async function updateGenreAction(_state: FormState, formData: FormData): Promise<FormState> {
   const user = await requireUser();
   if (!canWrite(user.role)) forbidden();
-  const result = await updateGenre(getDatabase(), user, Number(formData.get("id")), {
+  const result = await updateGenre(await getDatabase(), user, Number(formData.get("id")), {
     label: String(formData.get("label") ?? ""),
     labelMy: String(formData.get("labelMy") ?? ""),
   });
@@ -141,7 +141,7 @@ export async function updateGenreAction(_state: FormState, formData: FormData): 
 export async function deleteGenreAction(_state: FormState, formData: FormData): Promise<FormState> {
   const user = await requireUser();
   if (!canWrite(user.role)) forbidden();
-  const result = await deleteGenre(getDatabase(), user, Number(formData.get("id")));
+  const result = await deleteGenre(await getDatabase(), user, Number(formData.get("id")));
   if (!result.ok && result.error === "used") return { error: genreWriteError("used") };
   if (!result.ok && result.error === "forbidden") forbidden();
   if (!result.ok) notFound();
@@ -152,7 +152,7 @@ export async function addGlossaryAction(_state: FormState, formData: FormData): 
   const user = await requireUser();
   if (!canWrite(user.role)) forbidden();
   const novelId = Number(formData.get("novelId"));
-  const result = await addGlossaryTerm(getDatabase(), user, novelId, {
+  const result = await addGlossaryTerm(await getDatabase(), user, novelId, {
     source: String(formData.get("source") ?? ""),
     burmese: String(formData.get("burmese") ?? ""),
     note: String(formData.get("note") ?? ""),
@@ -169,7 +169,7 @@ export async function deleteGlossaryAction(formData: FormData): Promise<void> {
   const user = await requireUser();
   if (!canWrite(user.role)) forbidden();
   const novelId = Number(formData.get("novelId"));
-  const result = await deleteGlossaryTerm(getDatabase(), user, Number(formData.get("termId")));
+  const result = await deleteGlossaryTerm(await getDatabase(), user, Number(formData.get("termId")));
   if (!result.ok && result.error === "forbidden") forbidden();
   if (!result.ok) notFound();
   redirect(`/write/${novelId}`);

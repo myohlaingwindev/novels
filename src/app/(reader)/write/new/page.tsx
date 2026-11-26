@@ -7,7 +7,7 @@ import { NovelForm } from "../novel-form";
 
 export default async function NewNovelPage() {
   const user = await requireUser();
-  const genres = await listGenres(getDatabase());
+  const genres = await listGenres(await getDatabase());
   const genre = genres.find((item) => item.slug === "xianxia")?.slug ?? genres[0]?.slug ?? "xianxia";
   return (
     <main className="studio">

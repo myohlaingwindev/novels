@@ -8,7 +8,7 @@ import { FavoriteButton } from "../favorite-button";
 
 export default async function FavoritesPage() {
   const user = await requireUser();
-  const novels = await listFavorites(getDatabase(), user.id);
+  const novels = await listFavorites(await getDatabase(), user.id);
 
   return (
     <main className="library">

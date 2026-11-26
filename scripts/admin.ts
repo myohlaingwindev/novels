@@ -1,4 +1,4 @@
-import { getDatabase } from "@/db/client";
+import { openScriptDatabase } from "@/db/script";
 import { setAdminByEmail } from "@/auth/users";
 
 const email = process.argv[2];
@@ -8,7 +8,7 @@ if (!email) {
 }
 
 async function main() {
-  const db = getDatabase();
+  const db = await openScriptDatabase();
   const result = await setAdminByEmail(db, email);
   await db.$disconnect();
   if (!result.ok) {

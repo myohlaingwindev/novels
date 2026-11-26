@@ -11,7 +11,7 @@ export async function setAuthorAction(formData: FormData): Promise<void> {
   if (user.role !== "admin") forbidden();
   const userId = Number(formData.get("userId"));
   const grant = String(formData.get("grant")) === "true";
-  const result = await setAuthorGrant(getDatabase(), user.role, userId, grant);
+  const result = await setAuthorGrant(await getDatabase(), user.role, userId, grant);
   if (!result.ok && result.error === "forbidden") forbidden();
   revalidatePath("/admin/users");
 }

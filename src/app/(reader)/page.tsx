@@ -13,7 +13,7 @@ export default async function LibraryPage({
   searchParams: Promise<{ genre?: string }>;
 }) {
   const user = await requireUser();
-  const db = getDatabase();
+  const db = await getDatabase();
   const novels = await listNovelsForLibrary(db, user.id);
   const genreList = await listGenres(db);
   const params = await searchParams;

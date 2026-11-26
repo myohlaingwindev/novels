@@ -10,7 +10,7 @@ export async function setFavoriteAction(formData: FormData): Promise<void> {
   const user = await requireUser();
   const novelId = Number(formData.get("novelId"));
   const slug = String(formData.get("slug") ?? "");
-  const result = await setFavorite(getDatabase(), user.id, novelId, savedFrom(formData));
+  const result = await setFavorite(await getDatabase(), user.id, novelId, savedFrom(formData));
   if (!result.ok) notFound();
   revalidatePath(`/novels/${slug}`);
   revalidatePath("/favorites");
