@@ -4,10 +4,12 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build:worker": "opennextjs-cloudflare build && node scripts/trim-worker-wasm.mjs",
+    "deploy": "npm run build:worker && opennextjs-cloudflare deploy",
     "start": "next start",
     "test": "vitest run",
-    "admin": "node --import tsx scripts/admin.ts",
-    "seed": "node --import tsx scripts/seed.ts",
+    "admin": "node --import ./scripts/wasm-module-hook.mjs --import tsx scripts/admin.ts",
+    "seed": "node --import ./scripts/wasm-module-hook.mjs --import tsx scripts/seed.ts",
     "postinstall": "prisma generate"
   },
   "dependencies": {

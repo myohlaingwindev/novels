@@ -35,10 +35,14 @@ describe("admin promotion", () => {
 
   test("the command prints the sign-up message for an unknown email", () => {
     expect(() =>
-      execFileSync("node", ["--import", "tsx", "scripts/admin.ts", "missing@example.com"], {
-        env: { ...process.env, DATABASE_URL: testDatabaseUrl },
-        encoding: "utf8",
-      }),
+      execFileSync(
+        "node",
+        ["--import", "./scripts/wasm-module-hook.mjs", "--import", "tsx", "scripts/admin.ts", "missing@example.com"],
+        {
+          env: { ...process.env, DATABASE_URL: testDatabaseUrl },
+          encoding: "utf8",
+        },
+      ),
     ).toThrow(/No account for that email\. Sign up first\./);
   });
 
