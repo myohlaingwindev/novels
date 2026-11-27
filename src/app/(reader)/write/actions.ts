@@ -38,6 +38,8 @@ export async function createNovelAction(_state: FormState, formData: FormData): 
     sourceAuthor: String(formData.get("sourceAuthor") ?? ""),
     originAuthor: String(formData.get("originAuthor") ?? ""),
     hidden: hiddenFromForm(formData),
+    status: String(formData.get("status") ?? ""),
+    language: String(formData.get("language") ?? ""),
   });
   if (!result.ok && result.error === "slug") return { error: novelWriteError("slug") };
   if (!result.ok && result.error === "duplicate") return { error: novelWriteError("duplicate") };
@@ -62,6 +64,8 @@ export async function updateNovelAction(_state: FormState, formData: FormData): 
     sourceAuthor: String(formData.get("sourceAuthor") ?? ""),
     originAuthor: String(formData.get("originAuthor") ?? ""),
     hidden: hiddenFromForm(formData),
+    status: String(formData.get("status") ?? ""),
+    language: String(formData.get("language") ?? ""),
   });
   if (!result.ok && result.error === "genre") return { error: novelWriteError("genre") };
   if (!result.ok && result.error === "selector") return { error: novelWriteError("selector") };

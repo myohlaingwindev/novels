@@ -18,6 +18,8 @@ const novelSelect = {
   titleMy: true,
   descriptionMy: true,
   genre: true,
+  status: true,
+  language: true,
   hidden: true,
   originAuthor: true,
   owner: { select: { name: true, email: true } },
@@ -31,6 +33,8 @@ type CatalogNovel = {
   title: string;
   description: string;
   genre: string;
+  status: string;
+  language: string;
   authorName: string;
   originAuthor: string;
   ownerId: number;
@@ -63,6 +67,8 @@ async function loadCatalog(db: AppDb): Promise<CatalogNovel[]> {
       title: novel.titleMy,
       description: novel.descriptionMy,
       genre: novel.genre,
+      status: novel.status,
+      language: novel.language,
       authorName: displayAuthor(novel.owner),
       originAuthor: novel.originAuthor,
       ownerId: Number(novel.ownerId),
@@ -87,6 +93,8 @@ export async function listNovelsForLibrary(db: AppDb, readerId: number) {
       title: novel.title,
       description: novel.description,
       genre: novel.genre,
+      status: novel.status,
+      language: novel.language,
       slug: novel.slug,
       chapterCount: novel.chapters.length,
       firstChapterNumber: novel.chapters[0]?.number ?? null,

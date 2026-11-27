@@ -18,6 +18,8 @@ export type NovelInput = {
   sourceAuthor: string;
   originAuthor: string;
   hidden: boolean;
+  status?: string;
+  language?: string;
 };
 
 export type Novel = {
@@ -32,6 +34,8 @@ export type Novel = {
   sourceAuthor: string;
   originAuthor: string;
   genre: string;
+  status: string;
+  language: string;
   hidden: boolean;
   slug: string;
   createdAt: number;
@@ -39,6 +43,13 @@ export type Novel = {
 };
 
 type Actor = { id: number; role: Role };
+
+function catalogFlags(input: Pick<NovelInput, "status" | "language">) {
+  return {
+    status: input.status === "completed" ? "completed" : "ongoing",
+    language: input.language === "thai" ? "thai" : "english",
+  };
+}
 
 function sourceFields(input: Pick<NovelInput, "sourceTitle" | "sourceContent" | "sourceAuthor" | "originAuthor">) {
   const selectors = [input.sourceTitle, input.sourceContent, input.sourceAuthor];
@@ -63,6 +74,8 @@ function toNovel(row: {
   sourceAuthor: string;
   originAuthor: string;
   genre: string;
+  status: string;
+  language: string;
   hidden: boolean;
   slug: string;
   createdAt: bigint;
@@ -80,6 +93,8 @@ function toNovel(row: {
     sourceAuthor: row.sourceAuthor,
     originAuthor: row.originAuthor,
     genre: row.genre,
+    status: row.status,
+    language: row.language,
     hidden: row.hidden,
     slug: row.slug,
     createdAt: Number(row.createdAt),
@@ -127,6 +142,7 @@ export async function createNovel(
       descriptionMy: input.descriptionMy.trim(),
       ...source,
       genre: input.genre,
+      ...catalogFlags(input),
       hidden: input.hidden,
       slug,
       createdAt: now,
@@ -164,6 +180,7 @@ export async function updateNovel(
       descriptionMy: input.descriptionMy.trim(),
       ...source,
       genre: input.genre,
+      ...catalogFlags(input),
       hidden: input.hidden,
       updatedAt: Date.now(),
     },

@@ -18,6 +18,8 @@ export function NovelForm({
   originAuthor,
   genre,
   genres,
+  status = "ongoing",
+  language = "english",
   hidden,
   slug,
   authorName,
@@ -35,6 +37,8 @@ export function NovelForm({
   originAuthor: string;
   genre: string;
   genres: { slug: string; label: string }[];
+  status?: string;
+  language?: string;
   hidden: boolean;
   slug?: string;
   authorName: string;
@@ -51,6 +55,8 @@ export function NovelForm({
   const [sourceAuthorValue, setSourceAuthorValue] = useState(sourceAuthor);
   const [originAuthorValue, setOriginAuthorValue] = useState(originAuthor);
   const [genreValue, setGenreValue] = useState(genre);
+  const [statusValue, setStatusValue] = useState(status === "completed" ? "completed" : "ongoing");
+  const [languageValue, setLanguageValue] = useState(language === "thai" ? "thai" : "english");
   const options = genres.some((item) => item.slug === genre) ? genres : [...genres, { slug: genre, label: genre }];
   const [hiddenValue, setHiddenValue] = useState(hidden);
   const previewTitle = titleMyValue.trim() || titleValue.trim() || "Your title";
@@ -128,6 +134,27 @@ export function NovelForm({
               </label>
             </div>
           </fieldset>
+        </div>
+        <div className="split">
+          <div className="field">
+            <label htmlFor="status">Status</label>
+            <select id="status" name="status" value={statusValue} onChange={(event) => setStatusValue(event.target.value)}>
+              <option value="ongoing">Ongoing</option>
+              <option value="completed">Completed</option>
+            </select>
+          </div>
+          <div className="field">
+            <label htmlFor="language">Language</label>
+            <select
+              id="language"
+              name="language"
+              value={languageValue}
+              onChange={(event) => setLanguageValue(event.target.value)}
+            >
+              <option value="english">English</option>
+              <option value="thai">Thai</option>
+            </select>
+          </div>
         </div>
         <div className="field">
           <label htmlFor="description">Synopsis</label>

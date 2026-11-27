@@ -9,6 +9,7 @@ export type GenreRecord = {
   slug: string;
   label: string;
   labelMy: string;
+  position: number;
 };
 
 type Actor = { id: number; role: Role };
@@ -19,8 +20,8 @@ const defaults = [
   { slug: "english", label: "English fiction", labelMy: "အင်္ဂလိပ်ဝတ္ထု" },
 ];
 
-function toGenre(row: { id: bigint; slug: string; label: string; labelMy: string }): GenreRecord {
-  return { id: Number(row.id), slug: row.slug, label: row.label, labelMy: row.labelMy };
+function toGenre(row: { id: bigint; slug: string; label: string; labelMy: string; position: number }): GenreRecord {
+  return { id: Number(row.id), slug: row.slug, label: row.label, labelMy: row.labelMy, position: row.position };
 }
 
 export { genreLabel } from "@/novels/genre-label";
@@ -33,7 +34,7 @@ export async function ensureDefaultGenres(db: AppDb) {
 
 export async function listGenres(db: AppDb): Promise<GenreRecord[]> {
   return remember(genreListKey, readCacheTtlMs, async () => {
-    const rows = await db.genre.findMany({ orderBy: { label: "asc" } });
+    const rows = await db.genre.findMany({ orderBy: [{ position: "asc" }, { label: "asc" }, { id: "asc" }] });
     return rows.map(toGenre);
   });
 }
@@ -46,15 +47,16 @@ export async function genreExists(db: AppDb, slug: string): Promise<boolean> {
 export async function addGenre(
   db: AppDb,
   actor: Actor,
-  input: { label: string; labelMy: string },
+  input: { label: string; labelMy: string; slug?: string },
 ): Promise<{ ok: true; genre: GenreRecord } | { ok: false; error: "forbidden" | "label" | "duplicate" }> {
   if (!canWrite(actor.role)) return { ok: false, error: "forbidden" };
   const label = input.label.trim();
   const labelMy = input.labelMy.trim();
-  const slug = normalizeSlug(label);
+  const slug = input.slug?.trim() ? normalizeSlug(input.slug) : normalizeSlug(label);
   if (!label || !labelMy || !slug) return { ok: false, error: "label" };
   if (await db.genre.findUnique({ where: { slug } })) return { ok: false, error: "duplicate" };
-  const row = await db.genre.create({ data: { slug, label, labelMy } });
+  const highest = await db.genre.aggregate({ _max: { position: true } });
+  const row = await db.genre.create({ data: { slug, label, labelMy, position: (highest._max.position ?? -1) + 1 } });
   forget(genreListKey);
   return { ok: true, genre: toGenre(row) };
 }
@@ -87,6 +89,28 @@ export async function deleteGenre(
   const used = await db.novel.count({ where: { genre: current.slug } });
   if (used > 0) return { ok: false, error: "used" };
   await db.genre.delete({ where: { id: genreId } });
+  forget(genreListKey);
+  return { ok: true };
+}
+
+export async function moveGenre(
+  db: AppDb,
+  actor: Actor,
+  genreId: number,
+  direction: "up" | "down",
+): Promise<{ ok: true } | { ok: false; error: "forbidden" | "missing" }> {
+  if (actor.role !== "admin") return { ok: false, error: "forbidden" };
+  const rows = await db.genre.findMany({ orderBy: [{ position: "asc" }, { label: "asc" }, { id: "asc" }] });
+  const index = rows.findIndex((row) => Number(row.id) === genreId);
+  if (index < 0) return { ok: false, error: "missing" };
+  const swap = direction === "up" ? index - 1 : index + 1;
+  if (swap < 0 || swap >= rows.length) return { ok: true };
+  for (let i = 0; i < rows.length; i += 1) {
+    const row = rows[i];
+    if (!row) continue;
+    const position = i === index ? swap : i === swap ? index : i;
+    if (row.position !== position) await db.genre.update({ where: { id: row.id }, data: { position } });
+  }
   forget(genreListKey);
   return { ok: true };
 }

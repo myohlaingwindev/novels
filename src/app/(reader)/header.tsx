@@ -12,7 +12,7 @@ function readingPath(path: string) {
   return /\/chapters\/\d+$/.test(path);
 }
 
-export function Header({ user }: { user: PublicUser }) {
+export function Header({ user, balance }: { user: PublicUser; balance: number }) {
   const path = usePathname();
   const [open, setOpen] = useState(false);
   if (readingPath(path) || path.startsWith("/admin")) return null;
@@ -40,7 +40,7 @@ export function Header({ user }: { user: PublicUser }) {
           ) : null}
           {user.role === "admin" ? (
             <Link href="/admin/users" onClick={() => setOpen(false)}>
-              Users
+              Dashboard
             </Link>
           ) : null}
         </nav>
@@ -51,7 +51,7 @@ export function Header({ user }: { user: PublicUser }) {
             aria-current={path === "/credits" ? "page" : undefined}
             onClick={() => setOpen(false)}
           >
-            0 credits
+            {balance} {balance === 1 ? "credit" : "credits"}
           </Link>
           <div className="nav-account">
             <span className="signed-in">{name}</span>
@@ -85,7 +85,7 @@ export function SiteFooter() {
 
 export function BottomNav({ user }: { user: PublicUser }) {
   const path = usePathname();
-  if (readingPath(path)) return null;
+  if (readingPath(path) || path.startsWith("/admin")) return null;
   return (
     <nav className="bottom-nav" aria-label="Main">
       <Link href="/" aria-current={path === "/" ? "page" : undefined}>
@@ -98,7 +98,7 @@ export function BottomNav({ user }: { user: PublicUser }) {
         Favorites
       </Link>
       {canWrite(user.role) ? <Link href="/write">Write</Link> : null}
-      {user.role === "admin" ? <Link href="/admin/users">Users</Link> : null}
+      {user.role === "admin" ? <Link href="/admin/users">Dashboard</Link> : null}
     </nav>
   );
 }

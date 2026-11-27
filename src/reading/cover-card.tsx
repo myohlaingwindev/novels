@@ -6,16 +6,19 @@ export function Cover({
   title,
   kicker,
   credit,
+  promo = false,
   size = "full",
 }: {
   slug: string;
   title: string;
   kicker?: string;
   credit?: { originAuthor: string; authorName: string };
+  promo?: boolean;
   size?: "full" | "small";
 }) {
   return (
     <div className={size === "small" ? "cover cover-small" : "cover"} style={{ background: coverColor(slug) }}>
+      {promo ? <span className="promo-badge">Promo</span> : null}
       {kicker ? <span className="cover-kicker">{kicker}</span> : null}
       <span className="cover-title">{title}</span>
       {credit ? (

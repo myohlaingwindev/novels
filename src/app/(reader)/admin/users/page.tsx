@@ -1,9 +1,9 @@
-import Link from "next/link";
 import { forbidden } from "next/navigation";
 import { requireUser } from "@/auth/current";
 import { getDatabase } from "@/db/client";
-import { setAuthorAction } from "./actions";
 import { authorInitials, displayAuthor } from "@/reading/author";
+import { AdminShell } from "../shell";
+import { setAuthorAction } from "./actions";
 
 function roleLabel(role: string) {
   if (role === "author") return "Author";
@@ -29,24 +29,11 @@ export default async function UsersPage() {
     include: { _count: { select: { novels: true } } },
   });
   return (
-    <div className="admin">
-      <aside className="admin-side">
-        <div>
-          <div className="wordmark">Novelle</div>
-          <div className="kicker">Admin</div>
-        </div>
-        <nav aria-label="Admin">
-          <Link href="/admin/users" aria-current="page">
-            Users
-          </Link>
-          <Link href="/">← Back to site</Link>
-        </nav>
-      </aside>
-      <main>
-        <div className="studio-head">
-          <h1>Users</h1>
-          <p>Manage readers, authors and admins.</p>
-        </div>
+    <AdminShell current="users">
+      <div className="admin-head">
+        <h1>Dashboard</h1>
+        <p>Manage readers, authors and admins.</p>
+      </div>
         <div className="user-table">
           <div className="user-scroll">
             <table>
@@ -100,8 +87,7 @@ export default async function UsersPage() {
             </table>
           </div>
           <p className="table-foot">{accounts.length} users</p>
-        </div>
-      </main>
-    </div>
+      </div>
+    </AdminShell>
   );
 }

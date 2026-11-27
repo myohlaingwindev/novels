@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { setAdminByEmail, setAuthorGrant, signUp } from "@/auth/users";
-import { addGenre, deleteGenre, genreLabel, listGenres, updateGenre } from "@/novels/genre";
+import { addGenre, deleteGenre, genreLabel, listGenres, moveGenre, updateGenre } from "@/novels/genre";
 import { createNovel } from "@/novels/novels";
 import { novelInput, testDb } from "./helpers";
 
@@ -59,5 +59,18 @@ describe("genres", () => {
     if (!extra.ok) throw new Error("extra failed");
     expect(await deleteGenre(db, actor, extra.genre.id)).toEqual({ ok: true });
     expect((await listGenres(db)).some((genre) => genre.slug === "myth")).toBe(false);
+  });
+
+  test("stores a chosen slug and lets an admin move a genre", async () => {
+    const { db, actor } = await writer();
+    const added = await addGenre(db, actor, { label: "Court tale", labelMy: "နန်းတွင်း", slug: "Court Tale" });
+    if (!added.ok) throw new Error("add failed");
+    expect(added.genre.slug).toBe("court-tale");
+    const admin = { ...actor, role: "admin" as const };
+    const xianxia = (await listGenres(db)).find((genre) => genre.slug === "xianxia");
+    if (!xianxia) throw new Error("xianxia missing");
+    expect(await moveGenre(db, actor, xianxia.id, "up")).toEqual({ ok: false, error: "forbidden" });
+    expect(await moveGenre(db, admin, xianxia.id, "up")).toEqual({ ok: true });
+    expect((await listGenres(db)).map((genre) => genre.slug)).toEqual(["english", "xianxia", "wuxia", "court-tale"]);
   });
 });

@@ -10,7 +10,10 @@ import { chapterPage } from "@/reading/pages";
 import { isFavorite } from "@/reading/favorites";
 import { getNovelDetail, listNovelsForLibrary } from "@/reading/reading";
 import { relatedNovels } from "@/reading/related";
+import { reviewDate, reviewReasons, reviewsOnNovel, starMarks } from "@/reading/reviews";
 import { FavoriteButton } from "../../favorite-button";
+import { reportReviewAction, saveReviewAction } from "./actions";
+import { ReviewForm } from "./review-form";
 
 export default async function NovelPage({
   params,
@@ -36,6 +39,8 @@ export default async function NovelPage({
   const related = relatedNovels(library, detail.novel.slug, detail.novel.genre);
   const genre = genreLabel(genreList, detail.novel.genre);
   const saved = await isFavorite(db, user.id, detail.novel.id);
+  const reviews = await reviewsOnNovel(db, detail.novel.id, user.id);
+  const canReview = detail.continueNumber !== null || reviews.mine !== null;
 
   return (
     <main className="novel">
@@ -155,7 +160,56 @@ export default async function NovelPage({
       </section>
       <section className="reviews" aria-labelledby="reviews-heading">
         <h2 id="reviews-heading">Reviews</h2>
-        <p>Only readers who have read part of this novel can leave a review.</p>
+        {canReview ? (
+          <ReviewForm
+            action={saveReviewAction}
+            novelId={detail.novel.id}
+            rating={reviews.mine?.rating ?? 0}
+            body={reviews.mine?.body ?? ""}
+          />
+        ) : (
+          <p>Only readers who have read part of this novel can leave a review.</p>
+        )}
+        {reviews.mine?.hidden ? <p>Your review is hidden.</p> : null}
+        {reviews.list.length === 0 ? <p>No reviews yet.</p> : null}
+        <div className="review-list">
+          {reviews.list.map((review) => (
+            <article key={review.id} className="review-card">
+              <header>
+                <div className="avatar" aria-hidden="true">
+                  {authorInitials(review.readerName)}
+                </div>
+                <div>
+                  <strong>{review.readerName}</strong>
+                  <div className="card-meta">{reviewDate(review.createdAt)}</div>
+                </div>
+                <span className="review-stars" aria-label={`${review.rating} out of 5`}>
+                  {starMarks(review.rating)}
+                </span>
+              </header>
+              {review.body ? <p>{review.body}</p> : null}
+              {review.mine ? null : (
+                <form className="review-tools" action={reportReviewAction}>
+                  <input type="hidden" name="reviewId" value={review.id} />
+                  <input type="hidden" name="slug" value={detail.novel.slug} />
+                  <label className="sr" htmlFor={`reason-${review.id}`}>
+                    Report reason
+                  </label>
+                  <select id={`reason-${review.id}`} name="reason" defaultValue="spam">
+                    {reviewReasons().map((reason) => (
+                      <option key={reason.id} value={reason.id}>
+                        {reason.label}
+                      </option>
+                    ))}
+                  </select>
+                  <button className="btn2" type="submit">
+                    Report
+                  </button>
+                </form>
+              )}
+            </article>
+          ))}
+        </div>
       </section>
       {related.length > 0 ? (
         <section className="more">

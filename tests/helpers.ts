@@ -13,6 +13,11 @@ export async function testDb() {
     client = createFileDatabase(testDatabaseUrl);
   }
   clearMemoryCache();
+  await client.reviewReport.deleteMany();
+  await client.review.deleteMany();
+  await client.creditEntry.deleteMany();
+  await client.promotion.deleteMany();
+  await client.creditSettings.deleteMany();
   await client.glossaryTerm.deleteMany();
   await client.favorite.deleteMany();
   await client.progress.deleteMany();

@@ -20,5 +20,6 @@ export type AppDb = PrismaClient;
 declare global {
   interface CloudflareEnv {
     DB: ConstructorParameters<typeof PrismaD1>[0];
+    PUBLISH_TOKEN?: string;
   }
 }

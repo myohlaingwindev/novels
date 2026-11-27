@@ -42,6 +42,8 @@ export default async function EditNovelPage({ params }: { params: Promise<{ id: 
           originAuthor={novel.originAuthor}
           genre={novel.genre}
           genres={genres}
+          status={novel.status}
+          language={novel.language}
           hidden={novel.hidden}
           authorName={displayAuthor(user)}
           submitLabel="Save novel"
