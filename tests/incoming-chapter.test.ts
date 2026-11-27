@@ -1,8 +1,8 @@
 import { describe, expect, test } from "vitest";
-import { setAdminByEmail, signUp } from "@/auth/users";
-import { listChapters } from "@/novels/chapters";
-import { incomingChapter } from "@/novels/incoming-chapter";
-import { createNovel } from "@/novels/novels";
+import { setAdminByEmail, signUp } from "@/services/auth/users";
+import { listChapters } from "@/services/novels/chapters";
+import { incomingChapter, listChapterResults, readChapterResult } from "@/services/novels/incoming-chapter";
+import { createNovel } from "@/services/novels/novels";
 import { novelInput, testDb } from "./helpers";
 
 async function ownedNovel() {
@@ -56,5 +56,41 @@ describe("incomingChapter", () => {
       await incomingChapter(db, "secret", "secret", { ...chapter, bodyMy: "  ", novelId, hidden: false }),
     ).toEqual({ ok: false, error: "burmeseBody" });
     expect(await listChapters(db, novelId)).toEqual([]);
+  });
+
+  test("returns the saved title and body for a chapter number, or the latest chapter", async () => {
+    const { db, novelId } = await ownedNovel();
+    await incomingChapter(db, "secret", "secret", { ...chapter, novelId, hidden: true });
+    await incomingChapter(db, "secret", "secret", { ...chapter, title: "Road", body: "Two", novelId, hidden: true });
+    expect(await readChapterResult(db, novelId, 1)).toEqual({
+      ok: true,
+      number: 1,
+      title: "Dawn",
+      body: "One",
+      titleMy: "အခန်း",
+      bodyMy: "တစ်",
+    });
+    expect(await readChapterResult(db, novelId, null)).toMatchObject({
+      ok: true,
+      number: 2,
+      title: "Road",
+      body: "Two",
+    });
+    expect(await readChapterResult(db, novelId, 9)).toEqual({ ok: false, error: "missing" });
+  });
+
+  test("lists every chapter title for a novel", async () => {
+    const { db, novelId } = await ownedNovel();
+    await incomingChapter(db, "secret", "secret", { ...chapter, novelId, hidden: true });
+    await incomingChapter(db, "secret", "secret", { ...chapter, title: "Road", titleMy: "လမ်း", novelId, hidden: false });
+    expect(await listChapterResults(db, novelId)).toEqual({
+      ok: true,
+      novelId,
+      chapters: [
+        { number: 1, title: "Dawn", titleMy: "အခန်း", hidden: true },
+        { number: 2, title: "Road", titleMy: "လမ်း", hidden: false },
+      ],
+    });
+    expect(await listChapterResults(db, novelId + 999)).toEqual({ ok: false, error: "missing" });
   });
 });

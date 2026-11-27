@@ -1,9 +1,9 @@
 "use client";
 
 import { useActionState } from "react";
-import type { FormState } from "@/auth/actions";
-import type { PromotionRecord } from "@/credits/promotions";
-import { savePromotionAction } from "./actions";
+import type { FormState } from "@/controllers/auth";
+import type { PromotionRecord } from "@/services/credits/promotions";
+import { savePromotionAction } from "@/controllers/admin/promotions";
 
 export function PromotionForm({ promotion }: { promotion: PromotionRecord | null }) {
   const [state, action] = useActionState(savePromotionAction, null as FormState);

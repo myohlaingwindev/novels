@@ -1,9 +1,9 @@
 "use client";
 
 import { useActionState } from "react";
-import type { FormState } from "@/auth/actions";
-import type { CreditRules } from "@/credits/ledger";
-import { adjustCreditsAction, saveRulesAction } from "./actions";
+import type { FormState } from "@/controllers/auth";
+import type { CreditRules } from "@/services/credits/ledger";
+import { adjustCreditsAction, saveRulesAction } from "@/controllers/admin/credits";
 
 export function CreditForms({ rules }: { rules: CreditRules }) {
   const [rulesState, saveRules] = useActionState(saveRulesAction, null as FormState);

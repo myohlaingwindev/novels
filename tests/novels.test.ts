@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 import type { AppDb } from "@/db/client";
-import { setAdminByEmail, setAuthorGrant, signUp } from "@/auth/users";
-import { createNovel, deleteNovel, getNovelById, updateNovel } from "@/novels/novels";
+import { setAdminByEmail, setAuthorGrant, signUp } from "@/services/auth/users";
+import { createNovel, deleteNovel, getNovelById, updateNovel } from "@/services/novels/novels";
 import { novelInput, testDb } from "./helpers";
 
 async function account(db: AppDb, email: string) {
@@ -147,5 +147,21 @@ describe("novels", () => {
       error: "selector",
     });
     expect((await getNovelById(db, created.novel.id))?.sourceTitle).toBe("");
+  });
+
+  test("stores every selected genre and keeps the first as the primary", async () => {
+    const db = await testDb();
+    const author = await grantedAuthor(db);
+    const created = await createNovel(db, author, { ...novelInput(), genres: ["wuxia", "english"] });
+    if (!created.ok) throw new Error("create failed");
+    expect(created.novel.genre).toBe("wuxia");
+    expect(created.novel.genres).toEqual(["wuxia", "english"]);
+    const updated = await updateNovel(db, author, created.novel.id, { ...novelInput(), genres: ["xianxia"] });
+    if (!updated.ok) throw new Error("update failed");
+    expect((await getNovelById(db, created.novel.id))?.genres).toEqual(["xianxia"]);
+    expect(await updateNovel(db, author, created.novel.id, { ...novelInput(), genres: ["fantasy"] })).toEqual({
+      ok: false,
+      error: "genre",
+    });
   });
 });

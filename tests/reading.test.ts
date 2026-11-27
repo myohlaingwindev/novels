@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, test } from "vitest";
-import { setAdminByEmail, setPenName, signUp } from "@/auth/users";
-import { createChapter, deleteChapter, updateChapter } from "@/novels/chapters";
-import { createNovel } from "@/novels/novels";
-import { getNovelDetail, listNovelsForLibrary, openChapter } from "@/reading/reading";
+import { setAdminByEmail, setPenName, signUp } from "@/services/auth/users";
+import { createChapter, deleteChapter, updateChapter } from "@/services/novels/chapters";
+import { createNovel } from "@/services/novels/novels";
+import { getNovelDetail, listNovelsForLibrary, openChapter } from "@/services/reading/reading";
 import { chapterInput, novelInput, testDb } from "./helpers";
 
 describe("reading", () => {

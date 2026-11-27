@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { chooseGrab } from "@/novels/grab-choice";
+import { chooseGrab } from "@/services/novels/grab-choice";
 
 describe("chooseGrab", () => {
   test("fills only blank fields and saves a blank original author", () => {

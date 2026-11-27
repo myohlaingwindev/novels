@@ -1,9 +1,9 @@
 import Link from "next/link";
-import { requireUser } from "@/auth/current";
+import { requireUser } from "@/services/auth/current";
 import { getDatabase } from "@/db/client";
-import { ContinueCard } from "@/reading/continue-card";
-import { novelsStillReading } from "@/reading/progress";
-import { listNovelsForLibrary } from "@/reading/reading";
+import { ContinueCard } from "@/components/reading/continue-card";
+import { novelsStillReading } from "@/services/reading/progress";
+import { listNovelsForLibrary } from "@/services/reading/reading";
 
 export default async function ContinueReadingPage() {
   const user = await requireUser();

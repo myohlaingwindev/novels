@@ -1,9 +1,9 @@
 import { describe, expect, test } from "vitest";
-import { authorInitials, displayAuthor } from "@/reading/author";
-import { chapterPage } from "@/reading/pages";
-import { relatedNovels } from "@/reading/related";
-import { novelsStillReading, readingPercent } from "@/reading/progress";
-import { stepFontSize } from "@/reading/reader-prefs";
+import { authorInitials, displayAuthor } from "@/services/reading/author";
+import { chapterPage } from "@/services/reading/pages";
+import { relatedNovels } from "@/services/reading/related";
+import { novelsStillReading, readingPercent } from "@/services/reading/progress";
+import { stepFontSize } from "@/components/reading/reader-prefs";
 
 describe("displayAuthor", () => {
   test("uses the stored name, then the email name", () => {

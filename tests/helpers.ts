@@ -2,7 +2,7 @@ import path from "node:path";
 import type { PrismaClient } from "@/generated/prisma/client";
 import { createFileDatabase } from "@/db/file";
 import { clearMemoryCache } from "@/db/memory-cache";
-import { ensureDefaultGenres } from "@/novels/genre";
+import { ensureDefaultGenres } from "@/services/novels/genre";
 
 export const testDatabaseUrl = `file:${path.resolve("data/test.sqlite")}`;
 
@@ -23,6 +23,7 @@ export async function testDb() {
   await client.progress.deleteMany();
   await client.session.deleteMany();
   await client.chapter.deleteMany();
+  await client.novelGenre.deleteMany();
   await client.novel.deleteMany();
   await client.user.deleteMany();
   await client.genre.deleteMany();

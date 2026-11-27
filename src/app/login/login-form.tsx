@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
-import { logInAction, type FormState } from "@/auth/actions";
+import { logInAction, type FormState } from "@/controllers/auth";
 
 export function LoginForm() {
   const [state, action] = useActionState(logInAction, null as FormState);

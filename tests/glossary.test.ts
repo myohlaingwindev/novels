@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
-import { setAdminByEmail, setAuthorGrant, signUp } from "@/auth/users";
-import { addGlossaryTerm, deleteGlossaryTerm, listGlossary } from "@/novels/glossary";
-import { createNovel, deleteNovel } from "@/novels/novels";
+import { setAdminByEmail, setAuthorGrant, signUp } from "@/services/auth/users";
+import { addGlossaryTerm, deleteGlossaryTerm, listGlossary } from "@/services/novels/glossary";
+import { createNovel, deleteNovel } from "@/services/novels/novels";
 import { novelInput, testDb } from "./helpers";
 
 async function author() {

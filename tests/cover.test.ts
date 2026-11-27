@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { coverColor } from "@/reading/cover";
+import { coverColor } from "@/services/reading/cover";
 
 describe("coverColor", () => {
   test("picks a stable palette color from the slug", () => {

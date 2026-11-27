@@ -1,4 +1,4 @@
-import { setFavoriteAction } from "./favorite-actions";
+import { setFavoriteAction } from "@/controllers/favorites";
 
 export function FavoriteButton({
   saved,

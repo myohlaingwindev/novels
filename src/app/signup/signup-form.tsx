@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
-import { signUpAction, type FormState } from "@/auth/actions";
+import { signUpAction, type FormState } from "@/controllers/auth";
 
 export function SignUpForm() {
   const [state, action] = useActionState(signUpAction, null as FormState);

@@ -51,8 +51,19 @@ model Novel {
   favorites     Favorite[]
   glossary      GlossaryTerm[]
   reviews       Review[]
+  genreLinks    NovelGenre[]
 
   @@map("novels")
+}
+
+model NovelGenre {
+  novelId  BigInt @map("novel_id")
+  slug     String
+  position Int    @default(0)
+  novel    Novel  @relation(fields: [novelId], references: [id], onDelete: Cascade)
+
+  @@id([novelId, slug])
+  @@map("novel_genres")
 }
 
 model Review {

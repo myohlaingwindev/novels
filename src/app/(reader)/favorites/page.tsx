@@ -1,10 +1,10 @@
 import Link from "next/link";
-import { requireUser } from "@/auth/current";
+import { requireUser } from "@/services/auth/current";
 import { getDatabase } from "@/db/client";
-import { Cover } from "@/reading/cover-card";
-import { ContinueCard } from "@/reading/continue-card";
-import { CreditLines } from "@/reading/credit-lines";
-import { listFavorites } from "@/reading/favorites";
+import { Cover } from "@/components/reading/cover-card";
+import { ContinueCard } from "@/components/reading/continue-card";
+import { CreditLines } from "@/components/reading/credit-lines";
+import { listFavorites } from "@/services/reading/favorites";
 import { FavoriteButton } from "../favorite-button";
 
 export default async function FavoritesPage() {

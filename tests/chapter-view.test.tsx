@@ -1,6 +1,6 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, test } from "vitest";
-import { ChapterView } from "@/reading/chapter-view";
+import { ChapterView } from "@/components/reading/chapter-view";
 
 describe("ChapterView", () => {
   test("renders the chapter text and escapes HTML", () => {

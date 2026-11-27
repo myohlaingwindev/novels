@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { chapterHeading } from "@/reading/heading";
+import { chapterHeading } from "@/services/reading/heading";
 
 describe("chapterHeading", () => {
   test("uses the Burmese title or the number alone", () => {

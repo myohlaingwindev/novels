@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
-import { setAdminByEmail, signUp } from "@/auth/users";
-import { adjustCredits, creditBalance, creditRules, listCreditEntries, saveCreditRules } from "@/credits/ledger";
-import { activePromotions, promotionDates, promotionRule, savePromotion } from "@/credits/promotions";
+import { setAdminByEmail, signUp } from "@/services/auth/users";
+import { adjustCredits, creditBalance, creditRules, listCreditEntries, saveCreditRules } from "@/services/credits/ledger";
+import { activePromotions, promotionDates, promotionRule, savePromotion } from "@/services/credits/promotions";
 import { testDb } from "./helpers";
 
 async function admin() {

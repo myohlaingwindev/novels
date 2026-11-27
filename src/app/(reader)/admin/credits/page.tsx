@@ -1,6 +1,6 @@
 import { forbidden } from "next/navigation";
-import { requireUser } from "@/auth/current";
-import { creditKindLabel, creditRules, listCreditEntries } from "@/credits/ledger";
+import { requireUser } from "@/services/auth/current";
+import { creditKindLabel, creditRules, listCreditEntries } from "@/services/credits/ledger";
 import { getDatabase } from "@/db/client";
 import { Pager } from "../pager";
 import { AdminShell } from "../shell";

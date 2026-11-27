@@ -1,6 +1,6 @@
 import { openScriptDatabase } from "@/db/script";
-import { hashPassword } from "@/auth/password";
-import { ensureDefaultGenres } from "@/novels/genre";
+import { hashPassword } from "@/services/auth/password";
+import { ensureDefaultGenres } from "@/services/novels/genre";
 
 const password = "password1";
 

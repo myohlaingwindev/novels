@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { parseSelector } from "@/novels/selector";
+import { parseSelector } from "@/services/novels/selector";
 
 describe("parseSelector", () => {
   test("accepts a class, an id, a path, and a blank", () => {

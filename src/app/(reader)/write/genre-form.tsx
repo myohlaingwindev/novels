@@ -1,9 +1,9 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import type { FormState } from "@/auth/actions";
-import type { GenreRecord } from "@/novels/genre";
-import { addGenreAction, deleteGenreAction, updateGenreAction } from "./actions";
+import type { FormState } from "@/controllers/auth";
+import type { GenreRecord } from "@/services/novels/genre";
+import { addGenreAction, deleteGenreAction, updateGenreAction } from "@/controllers/write";
 
 export function GenreManager({ genres }: { genres: GenreRecord[] }) {
   return (

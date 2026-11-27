@@ -1,8 +1,8 @@
-import { requireUser } from "@/auth/current";
+import { requireUser } from "@/services/auth/current";
 import { getDatabase } from "@/db/client";
-import { listGenres } from "@/novels/genre";
-import { displayAuthor } from "@/reading/author";
-import { createNovelAction } from "../actions";
+import { listGenres } from "@/services/novels/genre";
+import { displayAuthor } from "@/services/reading/author";
+import { createNovelAction } from "@/controllers/write";
 import { NovelForm } from "../novel-form";
 
 export default async function NewNovelPage() {

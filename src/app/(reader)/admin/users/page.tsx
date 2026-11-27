@@ -1,9 +1,9 @@
 import { forbidden } from "next/navigation";
-import { requireUser } from "@/auth/current";
+import { requireUser } from "@/services/auth/current";
 import { getDatabase } from "@/db/client";
-import { authorInitials, displayAuthor } from "@/reading/author";
+import { authorInitials, displayAuthor } from "@/services/reading/author";
 import { AdminShell } from "../shell";
-import { setAuthorAction } from "./actions";
+import { setAuthorAction } from "@/controllers/admin/users";
 
 function roleLabel(role: string) {
   if (role === "author") return "Author";

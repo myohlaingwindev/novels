@@ -1,5 +1,5 @@
 import { openScriptDatabase } from "@/db/script";
-import { setAdminByEmail } from "@/auth/users";
+import { setAdminByEmail } from "@/services/auth/users";
 
 const email = process.argv[2];
 if (!email) {

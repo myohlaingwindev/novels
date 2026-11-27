@@ -10,6 +10,7 @@ const laterMigrations = [
   path.join(process.cwd(), "prisma/migrations/20261127010000_source_import/migration.sql"),
   path.join(process.cwd(), "prisma/migrations/20261127130000_admin_tools/migration.sql"),
   path.join(process.cwd(), "prisma/migrations/20261127140000_discover_features/migration.sql"),
+  path.join(process.cwd(), "prisma/migrations/20261127160000_novel_genres/migration.sql"),
 ];
 const prepared = new Set<string>();
 

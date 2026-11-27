@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { creditText } from "@/reading/credit";
+import { creditText } from "@/services/reading/credit";
 
 describe("creditText", () => {
   test("leaves Written by empty and still shows Published by", () => {

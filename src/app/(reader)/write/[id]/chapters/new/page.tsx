@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { forbidden, notFound } from "next/navigation";
-import { requireUser } from "@/auth/current";
+import { requireUser } from "@/services/auth/current";
 import { getDatabase } from "@/db/client";
-import { getNovelById } from "@/novels/novels";
-import { createChapterAction } from "../../../actions";
+import { getNovelById } from "@/services/novels/novels";
+import { createChapterAction } from "@/controllers/write";
 import { ChapterForm } from "../../../chapter-form";
 
 export default async function NewChapterPage({ params }: { params: Promise<{ id: string }> }) {

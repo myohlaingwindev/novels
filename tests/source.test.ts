@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { extractSource } from "@/novels/source";
+import { extractSource } from "@/services/novels/source";
 
 const html = `
   <article>

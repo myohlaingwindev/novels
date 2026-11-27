@@ -1,8 +1,8 @@
 import { describe, expect, test } from "vitest";
-import { signUp } from "@/auth/users";
-import { createChapter } from "@/novels/chapters";
-import { createNovel, getNovelById } from "@/novels/novels";
-import { moderateReview, reportReview, reviewStats, reviewsForModeration, reviewsOnNovel, saveReview } from "@/reading/reviews";
+import { signUp } from "@/services/auth/users";
+import { createChapter } from "@/services/novels/chapters";
+import { createNovel, getNovelById } from "@/services/novels/novels";
+import { moderateReview, reportReview, reviewStats, reviewsForModeration, reviewsOnNovel, saveReview } from "@/services/reading/reviews";
 import { chapterInput, novelInput, testDb } from "./helpers";
 
 async function publishedNovel() {

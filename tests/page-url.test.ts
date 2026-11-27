@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { publicPageUrl } from "@/novels/page-url";
+import { publicPageUrl } from "@/services/novels/page-url";
 
 describe("publicPageUrl", () => {
   test("accepts a public https URL", () => {

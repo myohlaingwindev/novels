@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
-import type { FormState } from "@/auth/actions";
+import type { FormState } from "@/controllers/auth";
 
 export function ReviewForm({
   action,

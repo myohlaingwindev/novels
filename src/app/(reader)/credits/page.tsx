@@ -1,6 +1,6 @@
-import { requireUser } from "@/auth/current";
-import { activePromotions, promotionRule } from "@/credits/promotions";
-import { creditBalance, creditDescription, creditHistoryForUser, creditRules } from "@/credits/ledger";
+import { requireUser } from "@/services/auth/current";
+import { activePromotions, promotionRule } from "@/services/credits/promotions";
+import { creditBalance, creditDescription, creditHistoryForUser, creditRules } from "@/services/credits/ledger";
 import { getDatabase } from "@/db/client";
 
 function when(createdAt: number) {

@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { sessionCookie } from "@/auth/cookie";
+import { sessionCookie } from "@/services/auth/cookie";
 
 describe("sessionCookie", () => {
   test("is httpOnly for 30 days and is not marked Secure", () => {

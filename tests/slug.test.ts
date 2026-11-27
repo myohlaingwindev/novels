@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { normalizeSlug, slugify } from "@/novels/slug";
+import { normalizeSlug, slugify } from "@/services/novels/slug";
 
 describe("slugify", () => {
   test("lowercases words and turns spaces into hyphens", () => {

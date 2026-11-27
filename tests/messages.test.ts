@@ -6,7 +6,7 @@ import {
   grabWriteError,
   missingSourceNotice,
   novelWriteError,
-} from "@/novels/messages";
+} from "@/services/novels/messages";
 
 describe("write errors", () => {
   test("uses the form messages", () => {

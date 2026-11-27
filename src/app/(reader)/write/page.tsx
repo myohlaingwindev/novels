@@ -1,8 +1,8 @@
 import Link from "next/link";
-import { requireUser } from "@/auth/current";
+import { requireUser } from "@/services/auth/current";
 import { getDatabase } from "@/db/client";
-import { listGenres } from "@/novels/genre";
-import { listOwnedNovels } from "@/novels/novels";
+import { listGenres } from "@/services/novels/genre";
+import { listOwnedNovels } from "@/services/novels/novels";
 import { GenreManager } from "./genre-form";
 import { PenNameForm } from "./pen-name-form";
 

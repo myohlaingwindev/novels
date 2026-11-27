@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
-import { hashPassword, verifyPassword } from "@/auth/password";
-import { normalizeEmail } from "@/auth/validators";
+import { hashPassword, verifyPassword } from "@/services/auth/password";
+import { normalizeEmail } from "@/services/auth/validators";
 
 describe("passwords", () => {
   test("verifies the original password and rejects a different one", async () => {

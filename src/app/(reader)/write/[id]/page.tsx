@@ -1,13 +1,13 @@
 import Link from "next/link";
 import { forbidden, notFound } from "next/navigation";
-import { requireUser } from "@/auth/current";
+import { requireUser } from "@/services/auth/current";
 import { getDatabase } from "@/db/client";
-import { listChapters } from "@/novels/chapters";
-import { listGenres } from "@/novels/genre";
-import { listGlossary } from "@/novels/glossary";
-import { getNovelById } from "@/novels/novels";
-import { displayAuthor } from "@/reading/author";
-import { deleteGlossaryAction, deleteNovelAction, updateNovelAction } from "../actions";
+import { listChapters } from "@/services/novels/chapters";
+import { listGenres } from "@/services/novels/genre";
+import { listGlossary } from "@/services/novels/glossary";
+import { getNovelById } from "@/services/novels/novels";
+import { displayAuthor } from "@/services/reading/author";
+import { deleteGlossaryAction, deleteNovelAction, updateNovelAction } from "@/controllers/write";
 import { GlossaryForm } from "../glossary-form";
 import { NovelForm } from "../novel-form";
 
@@ -41,6 +41,7 @@ export default async function EditNovelPage({ params }: { params: Promise<{ id: 
           sourceAuthor={novel.sourceAuthor}
           originAuthor={novel.originAuthor}
           genre={novel.genre}
+          selectedGenres={novel.genres}
           genres={genres}
           status={novel.status}
           language={novel.language}

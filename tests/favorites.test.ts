@@ -1,9 +1,9 @@
 import { describe, expect, test } from "vitest";
-import { setAdminByEmail, signUp } from "@/auth/users";
-import { createChapter } from "@/novels/chapters";
-import { createNovel, updateNovel } from "@/novels/novels";
-import { isFavorite, listFavorites, setFavorite } from "@/reading/favorites";
-import { openChapter } from "@/reading/reading";
+import { setAdminByEmail, signUp } from "@/services/auth/users";
+import { createChapter } from "@/services/novels/chapters";
+import { createNovel, updateNovel } from "@/services/novels/novels";
+import { isFavorite, listFavorites, setFavorite } from "@/services/reading/favorites";
+import { openChapter } from "@/services/reading/reading";
 import { chapterInput, novelInput, testDb } from "./helpers";
 
 async function visibleNovel() {

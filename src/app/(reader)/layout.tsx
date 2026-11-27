@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
-import { requireUser } from "@/auth/current";
-import { creditBalance } from "@/credits/ledger";
+import { requireUser } from "@/services/auth/current";
+import { creditBalance } from "@/services/credits/ledger";
 import { getDatabase } from "@/db/client";
 import { BottomNav, Header, SiteFooter } from "./header";
 

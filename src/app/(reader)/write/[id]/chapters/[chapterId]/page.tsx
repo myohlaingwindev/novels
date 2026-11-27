@@ -1,10 +1,10 @@
 import Link from "next/link";
 import { forbidden, notFound } from "next/navigation";
-import { requireUser } from "@/auth/current";
+import { requireUser } from "@/services/auth/current";
 import { getDatabase } from "@/db/client";
-import { getChapterById } from "@/novels/chapters";
-import { getNovelById } from "@/novels/novels";
-import { deleteChapterAction, updateChapterAction } from "../../../actions";
+import { getChapterById } from "@/services/novels/chapters";
+import { getNovelById } from "@/services/novels/novels";
+import { deleteChapterAction, updateChapterAction } from "@/controllers/write";
 import { ChapterForm } from "../../../chapter-form";
 
 export default async function EditChapterPage({

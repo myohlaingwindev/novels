@@ -1,4 +1,4 @@
-import { setPenNameAction } from "./actions";
+import { setPenNameAction } from "@/controllers/write";
 
 export function PenNameForm({ name }: { name: string }) {
   return (

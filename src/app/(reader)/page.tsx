@@ -1,14 +1,14 @@
 import Link from "next/link";
-import { requireUser } from "@/auth/current";
-import { activePromotions } from "@/credits/promotions";
+import { requireUser } from "@/services/auth/current";
+import { activePromotions } from "@/services/credits/promotions";
 import { getDatabase } from "@/db/client";
-import { genreLabel, listGenres } from "@/novels/genre";
-import { Cover } from "@/reading/cover-card";
-import { ContinueCard } from "@/reading/continue-card";
-import { CreditLines } from "@/reading/credit-lines";
-import { novelsStillReading } from "@/reading/progress";
-import { listNovelsForLibrary } from "@/reading/reading";
-import { reviewStats } from "@/reading/reviews";
+import { genreLabels, listGenres } from "@/services/novels/genre";
+import { Cover } from "@/components/reading/cover-card";
+import { ContinueCard } from "@/components/reading/continue-card";
+import { CreditLines } from "@/components/reading/credit-lines";
+import { novelsStillReading } from "@/services/reading/progress";
+import { listNovelsForLibrary } from "@/services/reading/reading";
+import { reviewStats } from "@/services/reading/reviews";
 
 type Query = {
   genre?: string | string[];
@@ -58,7 +58,7 @@ export default async function LibraryPage({ searchParams }: { searchParams: Prom
     return { ...novel, average: stat?.average ?? 0, reviewCount: stat?.count ?? 0 };
   });
   const matched = ranked.filter((novel) => {
-    if (selected.length > 0 && !selected.includes(novel.genre)) return false;
+    if (selected.length > 0 && !novel.genres.some((slug) => selected.includes(slug))) return false;
     if (status !== "any" && novel.status !== status) return false;
     if (language !== "any" && novel.language !== language) return false;
     if (promo && !sitePromotion) return false;
@@ -153,7 +153,7 @@ export default async function LibraryPage({ searchParams }: { searchParams: Prom
           <div className="catalog">
             {shown.map((novel) => (
               <Link key={novel.id} className="card" href={`/novels/${novel.slug}`}>
-                <Cover slug={novel.slug} title={novel.title} kicker={genreLabel(genreList, novel.genre)} promo={sitePromotion} />
+                <Cover slug={novel.slug} title={novel.title} kicker={genreLabels(genreList, novel.genres)} promo={sitePromotion} />
                 <div>
                   <div className="card-title">{novel.title}</div>
                   <div className="card-meta">

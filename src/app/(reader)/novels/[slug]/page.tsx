@@ -1,18 +1,18 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { requireUser } from "@/auth/current";
+import { requireUser } from "@/services/auth/current";
 import { getDatabase } from "@/db/client";
-import { genreLabel, listGenres } from "@/novels/genre";
-import { authorInitials } from "@/reading/author";
-import { Cover } from "@/reading/cover-card";
-import { CreditLines } from "@/reading/credit-lines";
-import { chapterPage } from "@/reading/pages";
-import { isFavorite } from "@/reading/favorites";
-import { getNovelDetail, listNovelsForLibrary } from "@/reading/reading";
-import { relatedNovels } from "@/reading/related";
-import { reviewDate, reviewReasons, reviewsOnNovel, starMarks } from "@/reading/reviews";
+import { genreLabel, genreLabels, listGenres } from "@/services/novels/genre";
+import { authorInitials } from "@/services/reading/author";
+import { Cover } from "@/components/reading/cover-card";
+import { CreditLines } from "@/components/reading/credit-lines";
+import { chapterPage } from "@/services/reading/pages";
+import { isFavorite } from "@/services/reading/favorites";
+import { getNovelDetail, listNovelsForLibrary } from "@/services/reading/reading";
+import { relatedNovels } from "@/services/reading/related";
+import { reviewDate, reviewReasons, reviewsOnNovel, starMarks } from "@/services/reading/reviews";
 import { FavoriteButton } from "../../favorite-button";
-import { reportReviewAction, saveReviewAction } from "./actions";
+import { reportReviewAction, saveReviewAction } from "@/controllers/reviews";
 import { ReviewForm } from "./review-form";
 
 export default async function NovelPage({
@@ -36,8 +36,8 @@ export default async function NovelPage({
   const startNumber = detail.chapters[0]?.number ?? null;
   const readNumber = detail.continueNumber ?? startNumber;
   const authorCount = library.filter((novel) => novel.ownerId === detail.novel.ownerId).length;
-  const related = relatedNovels(library, detail.novel.slug, detail.novel.genre);
-  const genre = genreLabel(genreList, detail.novel.genre);
+  const related = relatedNovels(library, detail.novel.slug, detail.novel.genres);
+  const genre = genreLabels(genreList, detail.novel.genres);
   const saved = await isFavorite(db, user.id, detail.novel.id);
   const reviews = await reviewsOnNovel(db, detail.novel.id, user.id);
   const canReview = detail.continueNumber !== null || reviews.mine !== null;

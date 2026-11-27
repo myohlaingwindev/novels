@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { currentUser } from "@/auth/current";
+import { currentUser } from "@/services/auth/current";
 import { AuthShell } from "../auth-shell";
 import { SignUpForm } from "./signup-form";
 

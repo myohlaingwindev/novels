@@ -1,8 +1,8 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import type { FormState } from "@/auth/actions";
-import { grabChapterAction } from "./actions";
+import type { FormState } from "@/controllers/auth";
+import { grabChapterAction } from "@/controllers/write";
 
 export function ChapterForm({
   action,

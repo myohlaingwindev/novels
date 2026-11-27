@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
-import { setAdminByEmail, signUp } from "@/auth/users";
-import { grabChapterSource } from "@/novels/grab";
-import { createNovel, getNovelById } from "@/novels/novels";
+import { setAdminByEmail, signUp } from "@/services/auth/users";
+import { grabChapterSource } from "@/services/novels/grab";
+import { createNovel, getNovelById } from "@/services/novels/novels";
 import { novelInput, testDb } from "./helpers";
 
 async function writerWithSelectors(overrides: Record<string, string | boolean> = {}) {

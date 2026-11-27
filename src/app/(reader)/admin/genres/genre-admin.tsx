@@ -1,9 +1,9 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import type { FormState } from "@/auth/actions";
-import type { GenreRecord } from "@/novels/genre";
-import { addGenreAdminAction, deleteGenreAdminAction, moveGenreAdminAction, updateGenreAdminAction } from "./actions";
+import type { FormState } from "@/controllers/auth";
+import type { GenreRecord } from "@/services/novels/genre";
+import { addGenreAdminAction, deleteGenreAdminAction, moveGenreAdminAction, updateGenreAdminAction } from "@/controllers/admin/genres";
 
 export type AdminGenre = GenreRecord & { novels: number };
 

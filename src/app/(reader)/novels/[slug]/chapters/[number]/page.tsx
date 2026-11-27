@@ -1,11 +1,11 @@
 import Link from "next/link";
 import { Noto_Sans_Myanmar } from "next/font/google";
 import { notFound } from "next/navigation";
-import { requireUser } from "@/auth/current";
+import { requireUser } from "@/services/auth/current";
 import { getDatabase } from "@/db/client";
-import { ChapterView } from "@/reading/chapter-view";
-import { ReaderChrome } from "@/reading/reader-prefs";
-import { openChapter } from "@/reading/reading";
+import { ChapterView } from "@/components/reading/chapter-view";
+import { ReaderChrome } from "@/components/reading/reader-prefs";
+import { openChapter } from "@/services/reading/reading";
 
 const myanmar = Noto_Sans_Myanmar({ subsets: ["myanmar"], weight: "400" });
 

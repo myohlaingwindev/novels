@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { forbidden } from "next/navigation";
-import { requireUser } from "@/auth/current";
-import { listPromotions, promotionDates, promotionKindLabel, promotionRule } from "@/credits/promotions";
+import { requireUser } from "@/services/auth/current";
+import { listPromotions, promotionDates, promotionKindLabel, promotionRule } from "@/services/credits/promotions";
 import { getDatabase } from "@/db/client";
 import { Pager } from "../pager";
 import { AdminShell } from "../shell";

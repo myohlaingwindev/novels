@@ -2,7 +2,7 @@ import { execFileSync } from "node:child_process";
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, test } from "vitest";
-import { listUsers, setAdminByEmail, setAuthorGrant, signUp } from "@/auth/users";
+import { listUsers, setAdminByEmail, setAuthorGrant, signUp } from "@/services/auth/users";
 import { testDatabaseUrl, testDb } from "./helpers";
 
 function collect(dir: string): string[] {
@@ -49,7 +49,7 @@ describe("admin promotion", () => {
   test("only the admin script calls setAdminByEmail", () => {
     const files = [...collect("src"), ...collect("scripts")];
     const callers = files.filter((path) => {
-      if (path.endsWith("src/auth/users.ts") || path.endsWith("src\\auth\\users.ts")) return false;
+      if (path.endsWith("src/services/auth/users.ts") || path.endsWith("src\\services\\auth\\users.ts")) return false;
       return readFileSync(path, "utf8").includes("setAdminByEmail");
     });
     expect(callers.map((path) => path.replaceAll("\\", "/"))).toEqual(["scripts/admin.ts"]);

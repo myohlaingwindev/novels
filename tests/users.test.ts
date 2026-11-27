@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { logIn, signUp } from "@/auth/users";
+import { logIn, signUp } from "@/services/auth/users";
 import { testDb } from "./helpers";
 
 describe("signUp", () => {

@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
-import { createSession, destroySession, getUserBySession } from "@/auth/session";
-import { signUp } from "@/auth/users";
+import { createSession, destroySession, getUserBySession } from "@/services/auth/session";
+import { signUp } from "@/services/auth/users";
 import { testDb } from "./helpers";
 
 describe("sessions", () => {

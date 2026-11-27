@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
-import { setPenName, signUp } from "@/auth/users";
-import { displayAuthor } from "@/reading/author";
+import { setPenName, signUp } from "@/services/auth/users";
+import { displayAuthor } from "@/services/reading/author";
 import { testDb } from "./helpers";
 
 describe("pen name", () => {

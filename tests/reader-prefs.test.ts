@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { readReaderPrefs } from "@/reading/reader-prefs";
+import { readReaderPrefs } from "@/components/reading/reader-prefs";
 
 describe("readReaderPrefs", () => {
   test("uses default and light for missing or unknown values", () => {

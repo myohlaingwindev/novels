@@ -3,10 +3,10 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { canWrite } from "@/auth/access";
-import { logoutAction } from "@/auth/actions";
-import type { PublicUser } from "@/auth/users";
-import { authorInitials, displayAuthor } from "@/reading/author";
+import { canWrite } from "@/services/auth/access";
+import { logoutAction } from "@/controllers/auth";
+import type { PublicUser } from "@/services/auth/users";
+import { authorInitials, displayAuthor } from "@/services/reading/author";
 
 function readingPath(path: string) {
   return /\/chapters\/\d+$/.test(path);

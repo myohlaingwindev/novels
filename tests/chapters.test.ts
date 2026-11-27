@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
-import { setAdminByEmail, signUp } from "@/auth/users";
-import { createChapter, deleteChapter, listChapters, updateChapter } from "@/novels/chapters";
-import { createNovel } from "@/novels/novels";
+import { setAdminByEmail, signUp } from "@/services/auth/users";
+import { createChapter, deleteChapter, listChapters, updateChapter } from "@/services/novels/chapters";
+import { createNovel } from "@/services/novels/novels";
 import { chapterInput, novelInput, testDb } from "./helpers";
 
 async function writer() {

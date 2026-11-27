@@ -1,8 +1,8 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import type { FormState } from "@/auth/actions";
-import { addGlossaryAction } from "./actions";
+import type { FormState } from "@/controllers/auth";
+import { addGlossaryAction } from "@/controllers/write";
 
 export function GlossaryForm({ novelId }: { novelId: number }) {
   const [state, formAction] = useActionState(addGlossaryAction, null as FormState);

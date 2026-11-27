@@ -1,11 +1,11 @@
 import Link from "next/link";
 import { forbidden } from "next/navigation";
-import { requireUser } from "@/auth/current";
+import { requireUser } from "@/services/auth/current";
 import { getDatabase } from "@/db/client";
-import { authorInitials } from "@/reading/author";
-import { reviewDate, reviewsForModeration, starMarks } from "@/reading/reviews";
+import { authorInitials } from "@/services/reading/author";
+import { reviewDate, reviewsForModeration, starMarks } from "@/services/reading/reviews";
 import { AdminShell } from "../shell";
-import { moderateReviewAction } from "./actions";
+import { moderateReviewAction } from "@/controllers/admin/reviews";
 
 export const metadata = { title: "Reviews – Novelle Admin" };
 

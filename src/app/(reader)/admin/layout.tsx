@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { forbidden } from "next/navigation";
-import { requireUser } from "@/auth/current";
+import { requireUser } from "@/services/auth/current";
 
 export default async function AdminLayout({ children }: { children: ReactNode }) {
   const user = await requireUser();

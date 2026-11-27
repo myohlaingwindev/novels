@@ -1,9 +1,9 @@
 "use client";
 
-import { useActionState, useState } from "react";
-import type { FormState } from "@/auth/actions";
-import { genreLabel } from "@/novels/genre-label";
-import { coverColor } from "@/reading/cover";
+import { useActionState, useEffect, useRef, useState } from "react";
+import type { FormState } from "@/controllers/auth";
+import { genreLabel, genreLabels } from "@/services/novels/genre-label";
+import { coverColor } from "@/services/reading/cover";
 
 export function NovelForm({
   action,
@@ -17,6 +17,7 @@ export function NovelForm({
   sourceAuthor,
   originAuthor,
   genre,
+  selectedGenres,
   genres,
   status = "ongoing",
   language = "english",
@@ -36,6 +37,7 @@ export function NovelForm({
   sourceAuthor: string;
   originAuthor: string;
   genre: string;
+  selectedGenres?: string[];
   genres: { slug: string; label: string }[];
   status?: string;
   language?: string;
@@ -54,10 +56,14 @@ export function NovelForm({
   const [sourceContentValue, setSourceContentValue] = useState(sourceContent);
   const [sourceAuthorValue, setSourceAuthorValue] = useState(sourceAuthor);
   const [originAuthorValue, setOriginAuthorValue] = useState(originAuthor);
-  const [genreValue, setGenreValue] = useState(genre);
+  const [genreValues, setGenreValues] = useState(selectedGenres && selectedGenres.length > 0 ? selectedGenres : [genre]);
   const [statusValue, setStatusValue] = useState(status === "completed" ? "completed" : "ongoing");
   const [languageValue, setLanguageValue] = useState(language === "thai" ? "thai" : "english");
-  const options = genres.some((item) => item.slug === genre) ? genres : [...genres, { slug: genre, label: genre }];
+  const known = new Set(genres.map((item) => item.slug));
+  const options = [
+    ...genres,
+    ...genreValues.filter((slug) => !known.has(slug)).map((slug) => ({ slug, label: slug })),
+  ];
   const [hiddenValue, setHiddenValue] = useState(hidden);
   const previewTitle = titleMyValue.trim() || titleValue.trim() || "Your title";
   return (
@@ -101,19 +107,10 @@ export function NovelForm({
         ) : null}
         <div className="split">
           <div className="field">
-            <label htmlFor="genre">Genre</label>
-            <select
-              id="genre"
-              name="genre"
-              value={genreValue}
-              onChange={(event) => setGenreValue(event.target.value)}
-            >
-              {options.map((option) => (
-                <option key={option.slug} value={option.slug}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
+            <label id="genre-label" htmlFor="genre">
+              Genre
+            </label>
+            <GenreSelect options={options} selected={genreValues} onChange={setGenreValues} />
           </div>
           <fieldset className="field">
             <legend>Library</legend>
@@ -138,7 +135,7 @@ export function NovelForm({
         <div className="split">
           <div className="field">
             <label htmlFor="status">Status</label>
-            <select id="status" name="status" value={statusValue} onChange={(event) => setStatusValue(event.target.value)}>
+            <select className="select-in" id="status" name="status" value={statusValue} onChange={(event) => setStatusValue(event.target.value)}>
               <option value="ongoing">Ongoing</option>
               <option value="completed">Completed</option>
             </select>
@@ -146,6 +143,7 @@ export function NovelForm({
           <div className="field">
             <label htmlFor="language">Language</label>
             <select
+              className="select-in"
               id="language"
               name="language"
               value={languageValue}
@@ -234,12 +232,78 @@ export function NovelForm({
       <aside className="panel preview-card">
         <span className="kicker">Preview</span>
         <div className="preview-cover" style={{ background: coverColor(slugValue || titleValue || "novel") }}>
-          <span>{genreLabel(options, genreValue)}</span>
+          <span>{genreValues.length > 0 ? genreLabels(options, genreValues) : "Genre"}</span>
           <b>{previewTitle}</b>
           <span>{authorName}</span>
         </div>
         <span className="hint">This is how your novel appears in the library. Readers see the Burmese title.</span>
       </aside>
     </form>
+  );
+}
+
+function GenreSelect({
+  options,
+  selected,
+  onChange,
+}: {
+  options: { slug: string; label: string }[];
+  selected: string[];
+  onChange: (next: string[]) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const root = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!open) return;
+    function closeOnOutside(event: PointerEvent) {
+      if (!root.current?.contains(event.target as Node)) setOpen(false);
+    }
+    function closeOnEscape(event: KeyboardEvent) {
+      if (event.key === "Escape") setOpen(false);
+    }
+    document.addEventListener("pointerdown", closeOnOutside);
+    document.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.removeEventListener("pointerdown", closeOnOutside);
+      document.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [open]);
+  const label = selected.length === 0 ? "Select a genre" : selected.map((slug) => genreLabel(options, slug)).join(", ");
+  return (
+    <div className="multi-select" ref={root}>
+      {selected.map((slug) => (
+        <input key={slug} type="hidden" name="genre" value={slug} />
+      ))}
+      <button
+        id="genre"
+        type="button"
+        className={selected.length === 0 ? "select-in is-placeholder" : "select-in"}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        aria-labelledby="genre-label"
+        onClick={() => setOpen((value) => !value)}
+      >
+        {label}
+      </button>
+      {open ? (
+        <div className="multi-menu" role="listbox" aria-multiselectable="true" aria-label="Genre">
+          {options.map((option) => {
+            const checked = selected.includes(option.slug);
+            return (
+              <label key={option.slug}>
+                <input
+                  type="checkbox"
+                  role="option"
+                  aria-selected={checked}
+                  checked={checked}
+                  onChange={() => onChange(checked ? selected.filter((slug) => slug !== option.slug) : [...selected, option.slug])}
+                />
+                {option.label}
+              </label>
+            );
+          })}
+        </div>
+      ) : null}
+    </div>
   );
 }

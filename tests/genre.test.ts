@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
-import { setAdminByEmail, setAuthorGrant, signUp } from "@/auth/users";
-import { addGenre, deleteGenre, genreLabel, listGenres, moveGenre, updateGenre } from "@/novels/genre";
-import { createNovel } from "@/novels/novels";
+import { setAdminByEmail, setAuthorGrant, signUp } from "@/services/auth/users";
+import { addGenre, deleteGenre, genreLabel, listGenres, moveGenre, updateGenre } from "@/services/novels/genre";
+import { createNovel } from "@/services/novels/novels";
 import { novelInput, testDb } from "./helpers";
 
 async function writer() {
