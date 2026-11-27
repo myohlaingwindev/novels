@@ -35,6 +35,10 @@
         "remote": true
       }
     ],
+    "ai": { 
+      "binding": "AI",
+      "remote": true
+    },
     "vars": {
       "OPEN_NEXT_USE_WEB_SOCKETS": "true"
     }

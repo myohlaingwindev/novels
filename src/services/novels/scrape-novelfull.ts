@@ -1,3 +1,4 @@
+import axios from "axios";
 import * as cheerio from  "cheerio";
 
 import type { ChapterContent } from "@/types/scrape";
@@ -9,7 +10,8 @@ const UA =
 
   export async function scrapeChapter(chapterUrl: URL): Promise<ChapterContent> {
 
-    const html = await fetchHtml(chapterUrl.toString());
+    const { data: html } = await axios.get<string>(chapterUrl.toString());
+
     const $ = cheerio.load(html);
   
     const content = $("#chapter-content");
@@ -47,29 +49,6 @@ const UA =
     return { url: chapterUrl.toString(), number, title: rawTitle, body };
   }
 
-  async function fetchHtml(url: string): Promise<string> {
-
-    const res = await fetch(url, {
-      headers: {
-        "User-Agent": UA,
-        Accept: "text/html,application/xhtml+xml",
-        "Accept-Language": "en-US,en;q=0.9",
-        Referer: `https://${ALLOWED_HOST}/`,
-      },
-    });
-  
-
-    if (!res.ok) {
-      const snippet = (await res.text()).slice(0, 200).replace(/\s+/g, " ");
-      console.log("Blocked:", res.status, {
-        server: res.headers.get("server"),
-        mitigated: res.headers.get("cf-mitigated"),
-        snippet,
-      });
-      throw new Error(`Upstream responded ${res.status}`);
-    }
-    return res.text();
-  }
   // https://novelfull.com/<slug>/chapter-2.html  or  chapter-2-some-title.html
   export function parseChapterUrl(raw: unknown): URL | null {
     if (typeof raw !== "string") return null;
